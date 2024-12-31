@@ -1,0 +1,13 @@
+{
+    "type": "service_account",
+    "project_id": "remitwise-757b9",
+    "private_key_id": "570aca7c49cfd220664d5ffeebf07b8752d24754",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4DGz+4MVFOm5P\nYTcSPTFd6UnYdlcToCQyV7xSSBYo54Wew7OcJ52uzHZmafrTnLwiMq3vNLU5mJTm\naYLBdVosVCmWyj/VXNZaelRCMPthh+nmoeuhH25m3coTjDlbFtpeg36gJCQVL0uY\n7CezrVrpDaJBiLkeiuF5lvRPlXG379+Fkz868jO73J1q3zLi7sIDfS8rusAYgv/t\nObnU2mdCTVEnrgTYeiP/3tgASmU6kFYg6NTxcOTjJ99vJQIlf5ISN5GpZyH/iLtn\nX2h/rmhNIjJp1eAcehzwYd/AjsDNnwyBEoGzELstb1Evf+xwxEyrMu4qHoKXl313\nYYIumkCDAgMBAAECggEAWl2vfo16Dn2b/9mpoojtHkEXAvNH2dj9LMKrMnM2fir/\nDm7kVz2UTGkTkUFj6FbCgMAFareka30hTuhrTPWDqtQ//0uaf/YvQQljKYTHSKHl\nFFpYSSoXmOY4+9QTrUfRPCqwF4znMoegRJte+veY9Wi+TBMHYZmrD3owxoqH5VlJ\nvQDNIZZh6fx/4YR4FZGIuZ99Jz7iETv+6hpKFCQKRrV5Tr04CD4Pl73gQag7BKQr\nThrFvb536RwAF4xBgFJOsG/59IeLKX9GJ81/hVX12rcCI9c4G9qlu0l9pinr0Czl\nSPnd95JW8WHeXoVUudgaHGANwwwhNsonkjI+s8rw0QKBgQDrMeXVQPHJj20vUDpx\nBqo7C9NlMIyMzzz8kiA+6Vq5o875v0mh6dZ/IhB6guo7w2T5sHRkBUjTdIaFFzwL\nZDNr/AYq1jwQD3fPiMCemk5RNQ0fr/qgSVz7qAoT99/AAhxZIBe4W8g5z9U9M+gT\nRGJDjWjbnafvZJXeS5zrh1ijTwKBgQDIVEss46ZcErP+Z791vVKnf0qFTSPpO7NS\n6Zvz9IkYMDaETu33jMBBEjT2ZyS2FZc1qSmsmjXuBDsYmcfkNq2VLMALiV/uNUsk\n74FPXvF63qKNJGu534jeua/LiDayTYSI6X2286Sc5QzJNipuVZI7XG58HNhNIjV1\nYnUKL7dSjQKBgQCatdn/q5bhBY3G/7lRvBaifKbz+zmZLoFpix3XBF1/m/d8ZY4k\nCdPlER1R2WgHJAL6FE6btLYxEoeiaKRAwgrpT4EnEIG19tbTF5vNOKen14PogjQU\n1+1oRSNL+1Od1EWdgvTXeth83u/gMJLKicMxuIVvYYeke7/x2D9C12dBFQKBgQCk\n47UI2sxYptBei5is2ctJsN1uwSLY29nrWfuSnmmlbjHBT5JRmxm3tbvAQP+XnEfc\n1ENIHZpcMkFOK227q0HPMolUNZuvX1Bds4GVCgnrX4seb6b31EU9RkurVI/ozSNU\n6hMe3oZU2bdfeuUL8gUuNRN/tuJXAtxLpWG+o63aFQKBgHIx/t4s8utclZEYKfkv\nUoxUwqqu8X88JjA/StVxfulm4IbJhvxwqnQpX62qLIfbgi+PzbXaJxff2nriWVPN\nnkBoiYAmjDzqMX7Gd/n6oHGlnNpIIoo76VUOXtk6s+vt7gLkTLqCaNRdPXGk6zjO\nDRYwy7yTmR/vIClfTJQehQGz\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-uhhdz@remitwise-757b9.iam.gserviceaccount.com",
+    "client_id": "106693553864205624239",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-uhhdz%40remitwise-757b9.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+}
