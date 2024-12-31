@@ -12,7 +12,10 @@ async function splitPDF(filePath: any, org_id: any) {
     const totalPages = pdfDoc.getPageCount();
 
     // Directory to save the single-page PDFs
-    const splitDir = path.join("/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf");
+    const environment = process.env.NODE_ENV
+    const splitDir: any = environment === 'development' ? "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf"
+        : process.env.content_path;
+    console.log(process.env.NODE_ENV)
     if (!fs.existsSync(splitDir)) {
         fs.mkdirSync(splitDir);
     }

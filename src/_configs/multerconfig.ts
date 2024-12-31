@@ -6,7 +6,9 @@ import { getNextSequence } from "../_services/getNextSequence";
 // Define storage configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const mainPath: any = process.env.content_path;
+        const environment = process.env.NODE_ENV
+        const mainPath: any = environment === 'development' ? "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf" :
+            process.env.content_path;
         if (!fs.existsSync(mainPath)) {
             fs.mkdirSync(mainPath);
         }
