@@ -490,7 +490,7 @@ const addNewChapterService = async (data: any): Promise<any> => {
             {
                 replacements: {
                     action_type: "insert_new_chapter",
-                    p_ORGSTRUCTUREID :null,
+                    p_ORGSTRUCTUREID: null,
 
                     p_ORGSTRUCTURENAME: data.orgStructureName,
                     p_PARENTKEY: data.parentKey,
@@ -527,7 +527,7 @@ const addNewExamService = async (data: any): Promise<any> => {
             {
                 replacements: {
                     action_type: "insert_new_exam",
-                    p_ORGSTRUCTUREID :null,
+                    p_ORGSTRUCTUREID: null,
                     p_ORGSTRUCTURENAME: data.orgStructureName,
                     p_PARENTKEY: data.parentKey,
                     p_POSITION: data.position,
@@ -813,12 +813,46 @@ const deleteCourseService = async (user: any): Promise<any> => {
     }
 };
 
+const deleteChapterService = async (data: any): Promise<any> => {
+    const transaction = await sequelize.transaction();
+    try {
+        // First DELETE
+        await sequelize.query(
+            `DELETE FROM ORGSTRUCTURE WHERE GROUPTYPE = 'EXAM' AND PARENTKEY = :chapterId`,
+            {
+                replacements: { chapterId: data.chapterId },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+
+        // Second DELETE
+        const result = await sequelize.query(
+            `DELETE FROM ORGSTRUCTURE WHERE ORGSTRUCTUREID = :chapterId`,
+            {
+                replacements: { chapterId: data.chapterId },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+
+        await transaction.commit();
+        console.log('Chapter deleted successfully:', result);
+        return {success:true,message:"Chapter deleted successfully"};
+    } catch (err) {
+        await transaction.rollback();
+        console.error('Error deleting chapter:', err);
+        throw new Error('Failed to delete chapter');
+    }
+};
+
+
 const getbatch = async (course: any, sponsor: any): Promise<any> => {
     let res: any = [];
     try {
 
         return await sequelize.query(`select * from BATCHDETAILS where COURSEID = ${course} and COMPANYID = ${sponsor} order by CREATEDON desc`, {
-           
+
             type: QueryTypes.SELECT
 
         });
@@ -900,5 +934,6 @@ export default {
     updateCourseService,
     updateChapterService,
     deleteCourseService,
-    getExamQuestionService
+    getExamQuestionService,
+    deleteChapterService
 }

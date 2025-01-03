@@ -433,7 +433,19 @@ const deleteCourse: RequestHandler = async (req, res, next) => {
     }
 
 };
+const deleteChapter: RequestHandler = async (req, res, next) => {
 
+    //debugger
+    let result: any;
+    try {
+        result = await adminService.deleteChapterService(req.body);
+        res.status(200).json(response.success(result));
+    } catch (error) {
+        var er: any = error
+        next(createHttpError('500', er.message));
+    }
+
+};
 const getbatch: RequestHandler = async (req, res, next) => {
     try {
         //  console.log(" cntrl run");
@@ -501,6 +513,7 @@ export default {
     updateChapter,
     deleteCourse,
     c_getByRole,
-    getExamQuestions
+    getExamQuestions,
+    deleteChapter
 
 }
