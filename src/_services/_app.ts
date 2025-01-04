@@ -9,6 +9,7 @@ import morganLogger from '../_configs/morgan';
 import * as firebaseApp from '../_dbs/firebase/fbMessage';
 import path from 'path';
 import dotenv from "dotenv"
+import bodyParser from "body-parser";
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ app.use(helmet());
 app.use(cors());
 //app.use(express.text());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 var allowedOrigins = ['http://103.171.45.231:8080', 'https://geyeapp.consultit.co.in:8000', 'http://127.0.0.1:3000', 'http://13.234.28.228:8000', 'http://52.66.173.135:3000', 'http://52.66.173.135:3001', 'http://52.66.173.135:3002', 'http://localhost:3000', 'https://www.remitwise.in', 'https://test.remitwise.in'];

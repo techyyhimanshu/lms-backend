@@ -5,7 +5,7 @@ import response from "../_middlewares/response";
 import splitPDF from "../_services/pdfSplitter";
 import { getNextSequence } from "../_services/getNextSequence";
 import path from "path";
-
+import XLSX from 'xlsx';
 
 function sleep(ms: number) {
     return new Promise((resolve) => {
@@ -476,7 +476,7 @@ const c_getByRole: RequestHandler = async (req, res, next) => {
     let result: any;
     try {
         const role = req.params.role;
-        if (!(role==='TUTOR' || role==='USER' || role==='ADMIN')) {
+        if (!(role === 'TUTOR' || role === 'USER' || role === 'ADMIN')) {
             return next(createHttpError(400, 'role should be correct')); // Handle missing courseId
         }
         result = await adminService.s_getByRole(role);
@@ -486,6 +486,95 @@ const c_getByRole: RequestHandler = async (req, res, next) => {
         next(createHttpError('500', er.message));
     }
 
+};
+
+const bulkUploadUserData: RequestHandler = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            throw createHttpError(400, 'No file uploaded.');
+        }
+        const {course_id,sponsor_id,batch_name}=req.body
+        const filePath = req.file.path;
+        const workbook = XLSX.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const rawData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        // // Sanitize and map the input data
+        // const sanitizedData = rawData.map(record => ({
+        //     "URN Number": String(record['URN Number'] || '').trim(),
+        //     "Name": String(record['Name'] || '').trim(),
+        //     "Email": String(record['Email'] || '').trim(),
+        //     "Mobile Number": String(record['Mobile Number'] || '').trim(),
+        //     "Branch": String(record['Branch'] || '').trim(),
+        //     "Referred By": String(record['Referred By'] || '').trim(),
+        //     "City": String(record['City'] || '').trim(),
+        //     "State": String(record['State'] || '').trim(),
+        //     "Application Number": String(record['Application Number'] || '').trim(),
+        //     "Code": String(record['Code'] || '').trim(),
+        //     "IPM": String(record['IPM'] || '').trim(),
+        // }));
+
+
+        // Pass sanitized data to the service
+        const result = await adminService.bulkUploadUserDataService(rawData,course_id,sponsor_id,batch_name);
+
+        res.status(200).json(response.success(result));
+    } catch (err) {
+        const error: any = err;
+        console.error("Error in bulk upload user controller", error);
+        next(createHttpError(error.status || 500, error.message || 'Internal Server Error'));
+    } 
+    // finally {
+    //     if (req.file) {
+    //         fs.unlink(req.file.path, (err) => {
+    //             if (err) console.error("Error removing file:", err.message);
+    //         });
+    //     }
+    // }
+};
+const bulkUploadExamQuestionsData: RequestHandler = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            throw createHttpError(400, 'No file uploaded.');
+        }
+        const {exam_id}=req.body
+        const filePath = req.file.path;
+        const workbook = XLSX.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const rawData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        // // Sanitize and map the input data
+        // const sanitizedData = rawData.map(record => ({
+        //     "URN Number": String(record['URN Number'] || '').trim(),
+        //     "Name": String(record['Name'] || '').trim(),
+        //     "Email": String(record['Email'] || '').trim(),
+        //     "Mobile Number": String(record['Mobile Number'] || '').trim(),
+        //     "Branch": String(record['Branch'] || '').trim(),
+        //     "Referred By": String(record['Referred By'] || '').trim(),
+        //     "City": String(record['City'] || '').trim(),
+        //     "State": String(record['State'] || '').trim(),
+        //     "Application Number": String(record['Application Number'] || '').trim(),
+        //     "Code": String(record['Code'] || '').trim(),
+        //     "IPM": String(record['IPM'] || '').trim(),
+        // }));
+
+
+        // Pass sanitized data to the service
+        const result = await adminService.bulkUploadExamQuestionsDataService(rawData,exam_id);
+
+        res.status(200).json(response.success(result));
+    } catch (err) {
+        const error: any = err;
+        console.error("Error in bulk upload user controller", error);
+        next(createHttpError(error.status || 500, error.message || 'Internal Server Error'));
+    } 
+    // finally {
+    //     if (req.file) {
+    //         fs.unlink(req.file.path, (err) => {
+    //             if (err) console.error("Error removing file:", err.message);
+    //         });
+    //     }
+    // }
 };
 
 export default {
@@ -514,6 +603,8 @@ export default {
     deleteCourse,
     c_getByRole,
     getExamQuestions,
-    deleteChapter
+    deleteChapter,
+    bulkUploadUserData,
+    bulkUploadExamQuestionsData
 
 }

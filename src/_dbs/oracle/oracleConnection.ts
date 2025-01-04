@@ -17,8 +17,8 @@ import config from '../../_configs/default'
 const sequelize = new Sequelize(config.service_name, config.db_user, config.db_password, {
   dialect: 'mysql',
   host: config.db_host,
-  port: config.db_port //optional,
-
+  port: config.db_port, //optional,
+  logging: console.log, // Enable SQL logging
 });
 
 

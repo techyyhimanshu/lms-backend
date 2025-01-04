@@ -7,23 +7,43 @@ import { getNextSequence } from "../_services/getNextSequence";
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const environment = process.env.NODE_ENV
-        const mainPath: any = environment === 'development' ? "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf" :
-            process.env.content_path;
+        const mainPath: any = environment === 'development' ? process.env.content_path : "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf"
+            ;
         if (!fs.existsSync(mainPath)) {
-            fs.mkdirSync(mainPath);
-        }
-        // Add this check
-        if (!req.body?.org_id) {
-            return cb(new Error("org_id is required"), "");
+            fs.mkdirSync(mainPath, { recursive: true });
         }
 
         if (file.mimetype === "application/pdf") {
-            cb(null, "./uploadeddocument");
-        } else if (file.mimetype === "video/mp4") {
-            const pathToSave = `${mainPath}/${req.body.org_id}`
+            const pathToSave = `${mainPath}/uploadeddocument`
             if (!fs.existsSync(pathToSave)) {
-                fs.mkdirSync(pathToSave);
+                fs.mkdirSync(pathToSave, { recursive: true });
             }
+            cb(null, pathToSave);
+        } else if (file.mimetype === "video/mp4") {
+            if (!req.body?.org_id) {
+                return cb(new Error("org_id is required"), "");
+            }
+            const pathToSave = `${mainPath}/pdf/${req.body.org_id}`
+            if (!fs.existsSync(pathToSave)) {
+                fs.mkdirSync(pathToSave, { recursive: true });
+            }
+            cb(null, pathToSave);
+        }
+
+        else if (file.mimetype === "application/vnd.ms-excel" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+            let pathToSave = ""
+            if (!req.body?.exam_id) {
+                pathToSave = `${mainPath}/excel/user/${req.body.batch_name}`
+                if (!fs.existsSync(pathToSave)) {
+                    fs.mkdirSync(pathToSave, { recursive: true });
+                }
+            }else{
+                pathToSave = `${mainPath}/excel/questions/${req.body.exam_id}`
+                if (!fs.existsSync(pathToSave)) {
+                    fs.mkdirSync(pathToSave, { recursive: true });
+                }
+            }
+
             cb(null, pathToSave);
         } else {
             cb(new Error("Unsupported file type!"), "");
@@ -32,11 +52,23 @@ const storage = multer.diskStorage({
     filename: async (req, file, cb) => {
         try {
             // Make the function async and await the sequence
-            const sequence = await getNextSequence(req.body.org_id);
-            const ext = path.extname(file.originalname);
+
 
             if (file.mimetype === "application/pdf" || file.mimetype === "video/mp4") {
+                const sequence = await getNextSequence(req.body.org_id);
+                const ext = path.extname(file.originalname);
                 cb(null, `${sequence ? sequence + 1 : 1}${ext}`);
+            } else {
+                const ext = path.extname(file.originalname);
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const hours = date.getHours();
+                const minutes = date.getMinutes();
+                const seconds = date.getSeconds();
+                cb(null, `${year}-${month}-${day}-${hours}-${minutes}-${seconds}${ext}`);
+                // cb(null, `${}${ext}`);
             }
         } catch (error: any) {
             cb(error, "");

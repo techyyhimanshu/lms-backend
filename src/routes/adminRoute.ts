@@ -42,7 +42,9 @@ router.delete('/chapter/delete', admin.deleteChapter);
 
 
 
-
+//Bulk upload
+router.post('/upload/user-data',upload.single('file'), admin.bulkUploadUserData);
+router.post('/upload/exam-data',upload.single('file'), admin.bulkUploadExamQuestionsData);
 
 
 

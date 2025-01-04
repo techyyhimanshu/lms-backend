@@ -838,7 +838,7 @@ const deleteChapterService = async (data: any): Promise<any> => {
 
         await transaction.commit();
         console.log('Chapter deleted successfully:', result);
-        return {success:true,message:"Chapter deleted successfully"};
+        return { success: true, message: "Chapter deleted successfully" };
     } catch (err) {
         await transaction.rollback();
         console.error('Error deleting chapter:', err);
@@ -907,6 +907,57 @@ const getExamQuestionService = async (examId: number): Promise<any> => {
         throw er;
     }
 };
+const bulkUploadUserDataService = async (data: Array<Object>, course_id: any, sponsor_id: any, batch_name: any): Promise<any> => {
+    try {
+        // Convert the array of objects to a JSON string
+        const jsonData = JSON.stringify(data);
+        // Call the stored procedure
+        const result = await sequelize.query(
+            `CALL sp_bulkUploadUser(:bulkData,:courseid,:sponsorid,:batchname)`,
+            {
+                replacements: {
+                    bulkData: jsonData, // Pass JSON string
+                    courseid: course_id,
+                    sponsorid: sponsor_id,
+                    batchname: batch_name,
+                   
+                },
+                type: QueryTypes.RAW,
+            }
+        );
+
+        return result;
+    } catch (err) {
+        console.error("Error in Bulk upload user service", err);
+        throw err;
+    }
+};
+
+
+const bulkUploadExamQuestionsDataService = async (data: Array<Object>, exam_id:any ): Promise<any> => {
+    try {
+        // Convert the array of objects to a JSON string
+        const jsonData = JSON.stringify(data);
+        // Call the stored procedure
+        const result = await sequelize.query(
+            `CALL sp_bulkUploadExamQuestion(:bulkData,:examId,:p_RANDOM)`,
+            {
+                replacements: {
+                    bulkData: jsonData, // Pass JSON string
+                    examId: exam_id,
+                    p_RANDOM: 1
+                   
+                },
+                type: QueryTypes.RAW,
+            }
+        );
+
+        return result;
+    } catch (err) {
+        console.error("Error in Bulk upload user service", err);
+        throw err;
+    }
+};
 
 export default {
 
@@ -935,5 +986,7 @@ export default {
     updateChapterService,
     deleteCourseService,
     getExamQuestionService,
-    deleteChapterService
+    deleteChapterService,
+    bulkUploadUserDataService,
+    bulkUploadExamQuestionsDataService
 }
