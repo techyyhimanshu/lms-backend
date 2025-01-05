@@ -418,6 +418,19 @@ const updateChapter: RequestHandler = async (req, res, next) => {
     }
 
 };
+const updateExam: RequestHandler = async (req, res, next) => {
+
+    //debugger
+    let result: any;
+    try {
+        result = await adminService.updateExamService(req.params.id,req.body);
+        res.status(200).json(response.success(result));
+    } catch (error) {
+        var er: any = error
+        next(createHttpError('500', er.message));
+    }
+
+};
 
 // --------------Delete controllers---------------
 const deleteCourse: RequestHandler = async (req, res, next) => {
@@ -501,6 +514,7 @@ const c_getByRole: RequestHandler = async (req, res, next) => {
 
 };
 
+// -------------------Bulk upload controllers--------------------
 const bulkUploadUserData: RequestHandler = async (req, res, next) => {
     try {
         if (!req.file) {
@@ -619,6 +633,7 @@ export default {
     deleteChapter,
     bulkUploadUserData,
     bulkUploadExamQuestionsData,
-    deleteExam
+    deleteExam,
+    updateExam
 
 }

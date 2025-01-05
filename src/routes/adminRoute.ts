@@ -35,6 +35,7 @@ router.get('/exam/:id/questions', admin.getExamQuestions);
 // Update routes---------------------------------------------------------
 router.patch('/course/update/:id', admin.updateCourse);
 router.patch('/chapter/update/:id', admin.updateChapter);
+router.patch('/chapter/exam/:id', admin.updateExam);
 
 // Delete routes---------------------------------------------------------
 router.delete('/course/delete/:id', admin.deleteCourse);

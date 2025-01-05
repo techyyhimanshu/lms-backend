@@ -765,6 +765,54 @@ const updateChapterService = async (id:any,user: any): Promise<any> => {
         throw er;
     }
 };
+
+const updateExamService = async (id:any,data: any): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `CALL sp_orgstructure(
+          :action_type,
+          :p_ORGSTRUCTUREID,
+          :p_ORGSTRUCTURENAME,
+          :p_PARENTKEY,
+          :p_POSITION,
+          :p_TYPEOFORG,
+          :p_HIERARCHYCODE,
+          :p_TIMEPERIODMIN,
+          :p_TIMEPERIODMAX,
+          :p_MANDATORYTONEXT,
+          :p_GROUPTYPE,
+          :p_NODEKEY,
+          :p_ORGSTRUCTUREHNAME
+        )`,
+            {
+                replacements: {
+                    action_type: "update_exam",
+                    p_ORGSTRUCTUREID: id,
+                    p_ORGSTRUCTURENAME: data.orgStructureName,
+                    p_PARENTKEY: null,
+                    p_POSITION: null,
+                    p_TYPEOFORG: null,
+                    p_HIERARCHYCODE: null,
+                    p_TIMEPERIODMIN: null,
+                    p_TIMEPERIODMAX: data.timePeriodMax,
+                    p_MANDATORYTONEXT: null,
+                    p_GROUPTYPE: null,
+                    p_NODEKEY: null,
+                    p_ORGSTRUCTUREHNAME: null
+                },
+                type: QueryTypes.RAW,
+            }
+        );
+        return result;
+    }
+    catch (err) {
+        let er: any = err;
+        throw er;
+    }
+};
+
+
+
 const deleteCourseService = async (id: any): Promise<any> => {
     const transaction = await sequelize.transaction();
     try {
@@ -1004,6 +1052,8 @@ const getExamQuestionService = async (examId: number): Promise<any> => {
         throw er;
     }
 };
+
+// ------Bulk upload services-------
 const bulkUploadUserDataService = async (data: Array<Object>, course_id: any, sponsor_id: any, batch_name: any): Promise<any> => {
     try {
         // Convert the array of objects to a JSON string
@@ -1086,5 +1136,6 @@ export default {
     deleteChapterService,
     bulkUploadUserDataService,
     bulkUploadExamQuestionsDataService,
-    deleteExamService
+    deleteExamService,
+    updateExamService
 }
