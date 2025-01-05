@@ -677,7 +677,7 @@ const activateuser = async (data: any): Promise<any> => {
 
 
 // ---------------Update services------------------
-const updateCourseService = async (id:any,user: any): Promise<any> => {
+const updateCourseService = async (id: any, user: any): Promise<any> => {
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
@@ -721,7 +721,7 @@ const updateCourseService = async (id:any,user: any): Promise<any> => {
         throw er;
     }
 };
-const updateChapterService = async (id:any,user: any): Promise<any> => {
+const updateChapterService = async (id: any, user: any): Promise<any> => {
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
@@ -766,7 +766,7 @@ const updateChapterService = async (id:any,user: any): Promise<any> => {
     }
 };
 
-const updateExamService = async (id:any,data: any): Promise<any> => {
+const updateExamService = async (id: any, data: any): Promise<any> => {
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
@@ -816,8 +816,8 @@ const updateExamService = async (id:any,data: any): Promise<any> => {
 const deleteCourseService = async (id: any): Promise<any> => {
     const transaction = await sequelize.transaction();
     try {
-       
-    // Deleting all the exams questions  related to a chapters
+
+        // Deleting all the exams questions  related to a chapters
         await sequelize.query(
             `DELETE q
         FROM ORGSTRUCTURE eq1
@@ -856,7 +856,7 @@ const deleteCourseService = async (id: any): Promise<any> => {
         );
 
         //Deleting PDF files/folder related to chapter
-        const chapterids= await sequelize.query(
+        const chapterids = await sequelize.query(
             `select ORGSTRUCTUREID from ORGSTRUCTURE where PARENTKEY = :courseId;`,
             {
                 replacements: { courseId: id },
@@ -865,10 +865,10 @@ const deleteCourseService = async (id: any): Promise<any> => {
             }
         );
         console.log(chapterids)
-        chapterids.map((id:any)=>{
+        chapterids.map((id: any) => {
             fs.rename(`${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}`, `${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}-deleted`, (err) => {
                 if (err) throw err;
-              });
+            });
         })
         // Deleting the chapters related to the course
         await sequelize.query(
@@ -889,8 +889,8 @@ const deleteCourseService = async (id: any): Promise<any> => {
                 transaction,
             }
         );
-       
-          
+
+
         await transaction.commit();
         return { status: 1, message: "Course deleted successfully" };
     } catch (err) {
@@ -948,8 +948,8 @@ const deleteChapterService = async (id: any): Promise<any> => {
         // Deleting chapter folder 
         fs.rename(`${process.env.content_path}/pdf/${id}`, `${process.env.content_path}/pdf/${id}-deleted`, (err) => {
             if (err) throw err;
-          });
-          
+        });
+
         await transaction.commit();
         return { status: 1, message: "Chapter deleted successfully" };
     } catch (err) {
@@ -972,7 +972,7 @@ const deleteExamService = async (id: any): Promise<any> => {
         );
 
         // Second DELETE
-         await sequelize.query(
+        await sequelize.query(
             `DELETE FROM EXAMQUESTION WHERE EXAMID = :examId`,
             {
                 replacements: { examId: id },
@@ -1067,7 +1067,7 @@ const bulkUploadUserDataService = async (data: Array<Object>, course_id: any, sp
                     courseid: course_id,
                     sponsorid: sponsor_id,
                     batchname: batch_name,
-                   
+
                 },
                 type: QueryTypes.RAW,
             }
@@ -1081,19 +1081,17 @@ const bulkUploadUserDataService = async (data: Array<Object>, course_id: any, sp
 };
 
 
-const bulkUploadExamQuestionsDataService = async (data: Array<Object>, exam_id:any ): Promise<any> => {
+const bulkUploadExamQuestionsDataService = async (data: Array<Object>, exam_id: any): Promise<any> => {
     try {
         // Convert the array of objects to a JSON string
         const jsonData = JSON.stringify(data);
         // Call the stored procedure
         const result = await sequelize.query(
-            `CALL sp_bulkUploadExamQuestion(:bulkData,:examId,:p_RANDOM)`,
+            `CALL sp_bulkUploadExamQuestion(:bulkData,:examId)`,
             {
                 replacements: {
                     bulkData: jsonData, // Pass JSON string
-                    examId: exam_id,
-                    p_RANDOM: 1
-                   
+                    examId: exam_id
                 },
                 type: QueryTypes.RAW,
             }

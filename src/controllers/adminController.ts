@@ -570,23 +570,6 @@ const bulkUploadExamQuestionsData: RequestHandler = async (req, res, next) => {
         const sheetName = workbook.SheetNames[0];
         const rawData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        // // Sanitize and map the input data
-        // const sanitizedData = rawData.map(record => ({
-        //     "URN Number": String(record['URN Number'] || '').trim(),
-        //     "Name": String(record['Name'] || '').trim(),
-        //     "Email": String(record['Email'] || '').trim(),
-        //     "Mobile Number": String(record['Mobile Number'] || '').trim(),
-        //     "Branch": String(record['Branch'] || '').trim(),
-        //     "Referred By": String(record['Referred By'] || '').trim(),
-        //     "City": String(record['City'] || '').trim(),
-        //     "State": String(record['State'] || '').trim(),
-        //     "Application Number": String(record['Application Number'] || '').trim(),
-        //     "Code": String(record['Code'] || '').trim(),
-        //     "IPM": String(record['IPM'] || '').trim(),
-        // }));
-
-
-        // Pass sanitized data to the service
         const result = await adminService.bulkUploadExamQuestionsDataService(rawData,exam_id);
 
         res.status(200).json(response.success(result));
