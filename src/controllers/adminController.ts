@@ -397,7 +397,7 @@ const updateCourse: RequestHandler = async (req, res, next) => {
     //debugger
     let result: any;
     try {
-        result = await adminService.updateCourseService(req.body);
+        result = await adminService.updateCourseService(req.params.id,req.body);
         res.status(200).json(response.success(result));
     } catch (error) {
         var er: any = error
@@ -410,7 +410,7 @@ const updateChapter: RequestHandler = async (req, res, next) => {
     //debugger
     let result: any;
     try {
-        result = await adminService.updateChapterService(req.body);
+        result = await adminService.updateChapterService(req.params.id,req.body);
         res.status(200).json(response.success(result));
     } catch (error) {
         var er: any = error
@@ -425,7 +425,7 @@ const deleteCourse: RequestHandler = async (req, res, next) => {
     //debugger
     let result: any;
     try {
-        result = await adminService.deleteCourseService(req.body);
+        result = await adminService.deleteCourseService(req.params.id);
         res.status(200).json(response.success(result));
     } catch (error) {
         var er: any = error
@@ -438,7 +438,7 @@ const deleteChapter: RequestHandler = async (req, res, next) => {
     //debugger
     let result: any;
     try {
-        result = await adminService.deleteChapterService(req.body);
+        result = await adminService.deleteChapterService(req.params.id);
         res.status(200).json(response.success(result));
     } catch (error) {
         var er: any = error

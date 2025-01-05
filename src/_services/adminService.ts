@@ -676,9 +676,8 @@ const activateuser = async (data: any): Promise<any> => {
 
 
 // ---------------Update services------------------
-const updateCourseService = async (user: any): Promise<any> => {
+const updateCourseService = async (id:any,user: any): Promise<any> => {
     try {
-        console.log("Called")
         const result = await sequelize.query(
             `CALL sp_orgstructure(
           :action_type,
@@ -698,13 +697,13 @@ const updateCourseService = async (user: any): Promise<any> => {
             {
                 replacements: {
                     action_type: "update_course",
-                    p_ORGSTRUCTUREID: user.courseId,
+                    p_ORGSTRUCTUREID: id,
                     p_ORGSTRUCTURENAME: user.orgStructureName,
                     p_PARENTKEY: null,
                     p_POSITION: null,
                     p_TYPEOFORG: null,
                     p_HIERARCHYCODE: null,
-                    p_TIMEPERIODMIN: user.timePeriodMin,
+                    p_TIMEPERIODMIN: id,
                     p_TIMEPERIODMAX: user.timePeriodMax,
                     p_MANDATORYTONEXT: null,
                     p_GROUPTYPE: null,
@@ -714,7 +713,6 @@ const updateCourseService = async (user: any): Promise<any> => {
                 type: QueryTypes.RAW,
             }
         );
-        console.log(result)
         return result;
     }
     catch (err) {
@@ -722,7 +720,7 @@ const updateCourseService = async (user: any): Promise<any> => {
         throw er;
     }
 };
-const updateChapterService = async (user: any): Promise<any> => {
+const updateChapterService = async (id:any,user: any): Promise<any> => {
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
@@ -743,13 +741,13 @@ const updateChapterService = async (user: any): Promise<any> => {
             {
                 replacements: {
                     action_type: "update_chapter",
-                    p_ORGSTRUCTUREID: user.chapterId,
+                    p_ORGSTRUCTUREID: id,
                     p_ORGSTRUCTURENAME: user.orgStructureName,
                     p_PARENTKEY: null,
                     p_POSITION: null,
                     p_TYPEOFORG: null,
                     p_HIERARCHYCODE: null,
-                    p_TIMEPERIODMIN: user.timePeriodMin,
+                    p_TIMEPERIODMIN: null,
                     p_TIMEPERIODMAX: user.timePeriodMax,
                     p_MANDATORYTONEXT: null,
                     p_GROUPTYPE: null,
@@ -759,7 +757,6 @@ const updateChapterService = async (user: any): Promise<any> => {
                 type: QueryTypes.RAW,
             }
         );
-        console.log(result)
         return result;
     }
     catch (err) {
@@ -767,7 +764,7 @@ const updateChapterService = async (user: any): Promise<any> => {
         throw er;
     }
 };
-const deleteCourseService = async (user: any): Promise<any> => {
+const deleteCourseService = async (id: any): Promise<any> => {
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
@@ -788,7 +785,7 @@ const deleteCourseService = async (user: any): Promise<any> => {
             {
                 replacements: {
                     action_type: "delete_course",
-                    p_ORGSTRUCTUREID: user.courseId,
+                    p_ORGSTRUCTUREID: id,
                     p_ORGSTRUCTURENAME: null,
                     p_PARENTKEY: null,
                     p_POSITION: null,
@@ -813,14 +810,14 @@ const deleteCourseService = async (user: any): Promise<any> => {
     }
 };
 
-const deleteChapterService = async (data: any): Promise<any> => {
+const deleteChapterService = async (id: any): Promise<any> => {
     const transaction = await sequelize.transaction();
     try {
         // First DELETE
         await sequelize.query(
             `DELETE FROM ORGSTRUCTURE WHERE GROUPTYPE = 'EXAM' AND PARENTKEY = :chapterId`,
             {
-                replacements: { chapterId: data.chapterId },
+                replacements: { chapterId: id },
                 type: QueryTypes.DELETE,
                 transaction,
             }
@@ -830,7 +827,7 @@ const deleteChapterService = async (data: any): Promise<any> => {
         const result = await sequelize.query(
             `DELETE FROM ORGSTRUCTURE WHERE ORGSTRUCTUREID = :chapterId`,
             {
-                replacements: { chapterId: data.chapterId },
+                replacements: { chapterId: id },
                 type: QueryTypes.DELETE,
                 transaction,
             }

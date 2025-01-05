@@ -33,12 +33,12 @@ router.get('/exam/:id/questions', admin.getExamQuestions);
 
 
 // Update routes---------------------------------------------------------
-router.patch('/course/update', admin.updateCourse);
-router.patch('/chapter/update', admin.updateChapter);
+router.patch('/course/update/:id', admin.updateCourse);
+router.patch('/chapter/update/:id', admin.updateChapter);
 
 // Delete routes---------------------------------------------------------
-router.delete('/course/delete', admin.deleteCourse);
-router.delete('/chapter/delete', admin.deleteChapter);
+router.delete('/course/delete/:id', admin.deleteCourse);
+router.delete('/chapter/delete/:id', admin.deleteChapter);
 
 
 
