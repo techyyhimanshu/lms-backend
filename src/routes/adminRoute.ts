@@ -39,6 +39,7 @@ router.patch('/chapter/update/:id', admin.updateChapter);
 // Delete routes---------------------------------------------------------
 router.delete('/course/delete/:id', admin.deleteCourse);
 router.delete('/chapter/delete/:id', admin.deleteChapter);
+router.delete('/chapter/exam/:id', admin.deleteExam);
 
 
 

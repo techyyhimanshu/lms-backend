@@ -8,6 +8,7 @@ var request = require('request');
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { baseurl } from '../baseurl'
+import fs from 'fs';
 require('dotenv').config();
 
 
@@ -765,55 +766,118 @@ const updateChapterService = async (id:any,user: any): Promise<any> => {
     }
 };
 const deleteCourseService = async (id: any): Promise<any> => {
+    const transaction = await sequelize.transaction();
     try {
-        const result = await sequelize.query(
-            `CALL sp_orgstructure(
-          :action_type,
-          :p_ORGSTRUCTUREID,
-          :p_ORGSTRUCTURENAME,
-          :p_PARENTKEY,
-          :p_POSITION,
-          :p_TYPEOFORG,
-          :p_HIERARCHYCODE,
-          :p_TIMEPERIODMIN,
-          :p_TIMEPERIODMAX,
-          :p_MANDATORYTONEXT,
-          :p_GROUPTYPE,
-          :p_NODEKEY,
-          :p_ORGSTRUCTUREHNAME
-        )`,
+       
+    // Deleting all the exams questions  related to a chapters
+        await sequelize.query(
+            `DELETE q
+        FROM ORGSTRUCTURE eq1
+        JOIN ORGSTRUCTURE os2 ON eq1.PARENTKEY = os2.ORGSTRUCTUREID
+        JOIN EXAMQUESTION q on q.EXAMID=eq1.ORGSTRUCTUREID
+        where os2.PARENTKEY = :courseId;`,
             {
-                replacements: {
-                    action_type: "delete_course",
-                    p_ORGSTRUCTUREID: id,
-                    p_ORGSTRUCTURENAME: null,
-                    p_PARENTKEY: null,
-                    p_POSITION: null,
-                    p_TYPEOFORG: null,
-                    p_HIERARCHYCODE: null,
-                    p_TIMEPERIODMIN: null,
-                    p_TIMEPERIODMAX: null,
-                    p_MANDATORYTONEXT: null,
-                    p_GROUPTYPE: null,
-                    p_NODEKEY: null,
-                    p_ORGSTRUCTUREHNAME: null
-                },
-                type: QueryTypes.RAW,
+                replacements: { courseId: id },
+                type: QueryTypes.DELETE,
+                transaction,
             }
         );
-        console.log(result)
-        return result;
-    }
-    catch (err) {
-        let er: any = err;
-        throw er;
+        //  Deleting all the exams related to a chapter
+        await sequelize.query(
+            `DELETE eq1
+        FROM ORGSTRUCTURE eq1
+        JOIN ORGSTRUCTURE os2 ON eq1.PARENTKEY = os2.ORGSTRUCTUREID
+        where os2.PARENTKEY = :courseId;`,
+            {
+                replacements: { courseId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+        //Deleting PDF paths from db related to chapter
+        await sequelize.query(
+            `DELETE cs1
+        FROM CONTENTSTATIC cs1
+        JOIN ORGSTRUCTURE os2 ON cs1.ORGSTRUCTUREID = os2.ORGSTRUCTUREID
+        where os2.PARENTKEY = :courseId;`,
+            {
+                replacements: { courseId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+
+        //Deleting PDF files/folder related to chapter
+        const chapterids= await sequelize.query(
+            `select ORGSTRUCTUREID from ORGSTRUCTURE where PARENTKEY = :courseId;`,
+            {
+                replacements: { courseId: id },
+                type: QueryTypes.SELECT,
+                transaction,
+            }
+        );
+        console.log(chapterids)
+        chapterids.map((id:any)=>{
+            fs.rename(`${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}`, `${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}-deleted`, (err) => {
+                if (err) throw err;
+              });
+        })
+        // Deleting the chapters related to the course
+        await sequelize.query(
+            `DELETE FROM ORGSTRUCTURE WHERE GROUPTYPE = 'CHAPTER' AND PARENTKEY = :courseId`,
+            {
+                replacements: { courseId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+
+        // Finally Deleting the course
+        await sequelize.query(
+            `DELETE FROM ORGSTRUCTURE WHERE ORGSTRUCTUREID = :courseId`,
+            {
+                replacements: { courseId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+       
+          
+        await transaction.commit();
+        return { status: 1, message: "Course deleted successfully" };
+    } catch (err) {
+        await transaction.rollback();
+        console.error('Error deleting course:', err);
+        throw new Error('Failed to delete course');
     }
 };
 
 const deleteChapterService = async (id: any): Promise<any> => {
     const transaction = await sequelize.transaction();
     try {
-        // First DELETE
+        // Deleting all the exam questions related to a chapter
+
+        await sequelize.query(
+            `DELETE eq1
+        FROM EXAMQUESTION eq1
+        JOIN ORGSTRUCTURE os2 ON eq1.EXAMID = os2.ORGSTRUCTUREID
+        where os2.PARENTKEY = :chapterId;`,
+            {
+                replacements: { chapterId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+        //Deleting PDFs related to chapter
+        await sequelize.query(
+            `DELETE FROM CONTENTSTATIC WHERE ORGSTRUCTUREID = :chapterId;`,
+            {
+                replacements: { chapterId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+        // Deleting the exam related to the chapter
         await sequelize.query(
             `DELETE FROM ORGSTRUCTURE WHERE GROUPTYPE = 'EXAM' AND PARENTKEY = :chapterId`,
             {
@@ -823,7 +887,7 @@ const deleteChapterService = async (id: any): Promise<any> => {
             }
         );
 
-        // Second DELETE
+        // Deleting the chapter
         const result = await sequelize.query(
             `DELETE FROM ORGSTRUCTURE WHERE ORGSTRUCTUREID = :chapterId`,
             {
@@ -833,15 +897,51 @@ const deleteChapterService = async (id: any): Promise<any> => {
             }
         );
 
+        // Deleting chapter folder 
+        fs.rename(`${process.env.content_path}/pdf/${id}`, `${process.env.content_path}/pdf/${id}-deleted`, (err) => {
+            if (err) throw err;
+          });
+          
         await transaction.commit();
-        console.log('Chapter deleted successfully:', result);
-        return { success: true, message: "Chapter deleted successfully" };
+        return { status: 1, message: "Chapter deleted successfully" };
     } catch (err) {
         await transaction.rollback();
         console.error('Error deleting chapter:', err);
         throw new Error('Failed to delete chapter');
     }
 };
+const deleteExamService = async (id: any): Promise<any> => {
+    const transaction = await sequelize.transaction();
+    try {
+        // First DELETE
+        await sequelize.query(
+            `DELETE FROM ORGSTRUCTURE WHERE GROUPTYPE = 'EXAM' AND ORGSTRUCTUREID = :examId`,
+            {
+                replacements: { examId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+
+        // Second DELETE
+         await sequelize.query(
+            `DELETE FROM EXAMQUESTION WHERE EXAMID = :examId`,
+            {
+                replacements: { examId: id },
+                type: QueryTypes.DELETE,
+                transaction,
+            }
+        );
+
+        await transaction.commit();
+        return { status: 1, message: "Exam deleted successfully" };
+    } catch (err) {
+        await transaction.rollback();
+        console.error('Error Exam chapter:', err);
+        throw new Error('Failed to delete Exam');
+    }
+};
+
 
 
 const getbatch = async (course: any, sponsor: any): Promise<any> => {
@@ -985,5 +1085,6 @@ export default {
     getExamQuestionService,
     deleteChapterService,
     bulkUploadUserDataService,
-    bulkUploadExamQuestionsDataService
+    bulkUploadExamQuestionsDataService,
+    deleteExamService
 }

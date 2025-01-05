@@ -446,6 +446,19 @@ const deleteChapter: RequestHandler = async (req, res, next) => {
     }
 
 };
+const deleteExam: RequestHandler = async (req, res, next) => {
+
+    //debugger
+    let result: any;
+    try {
+        result = await adminService.deleteExamService(req.params.id);
+        res.status(200).json(response.success(result));
+    } catch (error) {
+        var er: any = error
+        next(createHttpError('500', er.message));
+    }
+
+};
 const getbatch: RequestHandler = async (req, res, next) => {
     try {
         //  console.log(" cntrl run");
@@ -605,6 +618,7 @@ export default {
     getExamQuestions,
     deleteChapter,
     bulkUploadUserData,
-    bulkUploadExamQuestionsData
+    bulkUploadExamQuestionsData,
+    deleteExam
 
 }
