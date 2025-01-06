@@ -10,7 +10,7 @@ import * as firebaseApp from '../_dbs/firebase/fbMessage';
 import path from 'path';
 import dotenv from "dotenv"
 import bodyParser from "body-parser";
-
+import { globalErrorHandler } from '../_middlewares/globalErrorHandler';
 dotenv.config();
 
 //------------------------------------------------------api Server
@@ -43,7 +43,8 @@ firebaseApp.init();
 
 /** Routes */
 app.use('', routes);
-
+// Global error handler
+app.use(globalErrorHandler);
 // /** Error handling */
 app.use((req, res) => {
     console.log('---------------------------logging Not Found');

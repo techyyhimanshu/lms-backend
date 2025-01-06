@@ -6,7 +6,8 @@ import splitPDF from "../_services/pdfSplitter";
 import { getNextSequence } from "../_services/getNextSequence";
 import path from "path";
 import XLSX from 'xlsx';
-
+import { AppError } from '../helpers/customError';
+import { createHandler, deletehandler, updateHandler } from "../helpers/requrestHandler";
 function sleep(ms: number) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -272,32 +273,35 @@ const uploadPdf: RequestHandler = async (req, res, next) => {
 
 };
 
-const addNewCourse: RequestHandler = async (req, res, next) => {
+// const addNewCourse: RequestHandler = async (req, res, next) => {
 
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.addNewCourseService(req.body);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
+//     //debugger
+//     let result: any;
+//     try {
+//         result = await adminService.addNewCourseService(req.body);
+//         res.status(200).json(response.success(result));
+//     } catch (error) {
+//         var er: any = error
+//         next(createHttpError('500', er.message));
+//     }
 
-};
-const addNewChapter: RequestHandler = async (req, res, next) => {
+// };
+const addNewCourse=createHandler(adminService.addNewCourseService)
 
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.addNewChapterService(req.body);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
+const addNewChapter=createHandler(adminService.addNewChapterService)
+// const addNewChapter: RequestHandler = async (req, res, next) => {
 
-};
+//     //debugger
+//     let result: any;
+//     try {
+//         result = await adminService.addNewChapterService(req.body);
+//         res.status(200).json(response.success(result));
+//     } catch (error) {
+//         var er: any = error
+//         next(createHttpError('500', er.message));
+//     }
+
+// };
 const addNewExam: RequestHandler = async (req, res, next) => {
 
     //debugger
@@ -392,86 +396,48 @@ const getExamQuestions: RequestHandler = async (req, res, next) => {
 };
 
 // --------------Update controllers---------------
-const updateCourse: RequestHandler = async (req, res, next) => {
-
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.updateCourseService(req.params.id,req.body);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
-
-};
-const updateChapter: RequestHandler = async (req, res, next) => {
-
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.updateChapterService(req.params.id,req.body);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
-
-};
-const updateExam: RequestHandler = async (req, res, next) => {
-
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.updateExamService(req.params.id,req.body);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
-
-};
+const updateCourse=updateHandler(adminService.updateCourseService,'Course')
+const updateChapter=updateHandler(adminService.updateChapterService,'Chapter')
+const updateExam=updateHandler(adminService.updateExamService,'Exam')
 
 // --------------Delete controllers---------------
-const deleteCourse: RequestHandler = async (req, res, next) => {
+const deleteCourse = deletehandler(adminService.deleteCourseService, 'Course');
 
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.deleteCourseService(req.params.id);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
+const deleteChapter = deletehandler(adminService.deleteChapterService, 'Chapter');
+const deleteExam = deletehandler(adminService.deleteExamService, 'Exam');
 
-};
-const deleteChapter: RequestHandler = async (req, res, next) => {
+// const deleteChapter: RequestHandler = async (req, res, next) => {
 
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.deleteChapterService(req.params.id);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
+//     //debugger
+//     let result: any;
+//     try {
+//         if (!req.params.id) {
+//             return next(new AppError('ChapterId is required', 400));
+//         }
+//         result = await adminService.deleteChapterService(req.params.id);
+//         res.status(200).json(response.success(result));
+//     } catch (error) {
+//         var er: any = error
+//         return next(new AppError('Internal server error', 500));
+//     }
 
-};
-const deleteExam: RequestHandler = async (req, res, next) => {
+// };
+// const deleteExam: RequestHandler = async (req, res, next) => {
 
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.deleteExamService(req.params.id);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
+//     //debugger
+//     let result: any;
+//     try {
+//         if (!req.params.id) {
+//             return next(new AppError('ExamId is required', 400));
+//         }
+//         result = await adminService.deleteExamService(req.params.id);
+//         res.status(200).json(response.success(result));
+//     } catch (error) {
+//         var er: any = error
+//         return next(new AppError('Internal server error', 500));
+//     }
 
-};
+// };
 const getbatch: RequestHandler = async (req, res, next) => {
     try {
         //  console.log(" cntrl run");
@@ -481,7 +447,8 @@ const getbatch: RequestHandler = async (req, res, next) => {
 
         // Validate that both parameters are provided
         if (!course || !sponsor) {
-            return next(createHttpError(400, 'Both course and sponsor are required'));
+            return next(new AppError('Both course and sponsor are required', 400));
+
         }
 
         // Call adminService.course with courseId
@@ -492,7 +459,7 @@ const getbatch: RequestHandler = async (req, res, next) => {
         res.status(200).json(response.success(changeDetail));
     } catch (err) {
         const er: any = err;
-        next(createHttpError(500, er.message));
+        return next(new AppError('Internal server error', 500));
     }
 };
 
@@ -503,13 +470,14 @@ const c_getByRole: RequestHandler = async (req, res, next) => {
     try {
         const role = req.params.role;
         if (!(role === 'TUTOR' || role === 'USER' || role === 'ADMIN')) {
-            return next(createHttpError(400, 'role should be correct')); // Handle missing courseId
+            return next(new AppError('role should be correct', 400));
+            // Handle missing courseId
         }
         result = await adminService.s_getByRole(role);
         res.status(200).json(response.success(result));
     } catch (error) {
         var er: any = error
-        next(createHttpError('500', er.message));
+        return next(new AppError('Internal server error', 500));
     }
 
 };
@@ -518,9 +486,9 @@ const c_getByRole: RequestHandler = async (req, res, next) => {
 const bulkUploadUserData: RequestHandler = async (req, res, next) => {
     try {
         if (!req.file) {
-            throw createHttpError(400, 'No file uploaded.');
+            return next(new AppError('No file provided', 400));
         }
-        const {course_id,sponsor_id,batch_name}=req.body
+        const { course_id, sponsor_id, batch_name } = req.body
         const filePath = req.file.path;
         const workbook = XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
@@ -543,14 +511,15 @@ const bulkUploadUserData: RequestHandler = async (req, res, next) => {
 
 
         // Pass sanitized data to the service
-        const result = await adminService.bulkUploadUserDataService(rawData,course_id,sponsor_id,batch_name);
+        const result = await adminService.bulkUploadUserDataService(rawData, course_id, sponsor_id, batch_name);
 
         res.status(200).json(response.success(result));
     } catch (err) {
         const error: any = err;
         console.error("Error in bulk upload user controller", error);
-        next(createHttpError(error.status || 500, error.message || 'Internal Server Error'));
-    } 
+        return next(new AppError('Internal server error', 500));
+
+    }
     // finally {
     //     if (req.file) {
     //         fs.unlink(req.file.path, (err) => {
@@ -562,22 +531,22 @@ const bulkUploadUserData: RequestHandler = async (req, res, next) => {
 const bulkUploadExamQuestionsData: RequestHandler = async (req, res, next) => {
     try {
         if (!req.file) {
-            throw createHttpError(400, 'No file uploaded.');
+            return next(new AppError('No file provided', 400));
         }
-        const {exam_id}=req.body
+        const { exam_id } = req.body
         const filePath = req.file.path;
         const workbook = XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const rawData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        const result = await adminService.bulkUploadExamQuestionsDataService(rawData,exam_id);
+        const result = await adminService.bulkUploadExamQuestionsDataService(rawData, exam_id);
 
         res.status(200).json(response.success(result));
     } catch (err) {
         const error: any = err;
-        console.error("Error in bulk upload user controller", error);
-        next(createHttpError(error.status || 500, error.message || 'Internal Server Error'));
-    } 
+        console.error("Error in bulk upload exam questions controller", error.message);
+        return next(new AppError('Internal Server Error', 500));
+    }
     // finally {
     //     if (req.file) {
     //         fs.unlink(req.file.path, (err) => {

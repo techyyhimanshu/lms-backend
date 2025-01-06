@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { baseurl } from '../baseurl'
 import fs from 'fs';
+import { AppError } from '../helpers/customError';
 require('dotenv').config();
 
 
@@ -482,6 +483,23 @@ const addNewCourseService = async (user: any): Promise<any> => {
 };
 const addNewChapterService = async (data: any): Promise<any> => {
     try {
+        const requiredFields = [
+            'orgStructureName',
+            'parentKey',
+            'position',
+            'typeOfOrg',
+            'hierarchyCode',
+            'timePeriodMin',
+            'timePeriodMax',
+            'mandatoryToNext',
+            'groupType',
+            'orgStructureHName',
+        ];
+        for (const field of requiredFields) {
+            if (!data[field]) {
+                throw new AppError(`Missing required field: ${field}`,400);
+            }
+        }
         const result = await sequelize.query(
             `CALL sp_orgstructure(
                 :action_type,:p_ORGSTRUCTUREID,
