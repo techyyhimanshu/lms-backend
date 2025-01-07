@@ -2,73 +2,95 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { getNextSequence } from "../_services/getNextSequence";
+import { AppError } from "../helpers/customError";
 
-// Define storage configuration
+const createDirectory = (dirPath: string): void => {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+};
+
+const getMainPath = (): string => {
+    return process.env.content_path || "/default/path/to/uploads";
+};
+
+const validateParameters = (params: Record<string, any>, required: string[]): void => {
+    const missing = required.filter(param => !params[param]);
+    if (missing.length) {
+        throw new AppError(`Missing required parameters: ${missing.join(", ")}`, 400);
+    }
+};
+
+const generateTimestampedFilename = (originalName: string): string => {
+    const ext = path.extname(originalName);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    return `${timestamp}${ext}`;
+};
+
+const isExcelFile = (mimetype: string): boolean => {
+    return [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ].includes(mimetype);
+};
+
+const handleUploadRoute = (file: Express.Multer.File, req: any): string => {
+    validateParameters(req.body, ["org_id"]);
+    if (file.mimetype === "application/pdf") {
+        return `${getMainPath()}/uploadeddocument`;
+    } else if (file.mimetype === "video/mp4") {
+        return `${getMainPath()}/pdf/${req.body.org_id}`;
+    }
+    throw new AppError(`Unsupported file type: ${file.mimetype}`, 400);
+};
+
+const handleUserDataRoute = (file: Express.Multer.File, req: any): string => {
+    validateParameters(req.body, ["course_id", "sponsor_id", "batch_name"]);
+    if (isExcelFile(file.mimetype)) {
+        return `${getMainPath()}/excel/user/${req.body.batch_name}`;
+    }
+    throw new AppError(`Unsupported file type: ${file.mimetype}`, 400);
+};
+
+const handleExamDataRoute = (file: Express.Multer.File, req: any): string => {
+    validateParameters(req.body, ["exam_id"]);
+    if (isExcelFile(file.mimetype)) {
+        return `${getMainPath()}/excel/questions/${req.body.exam_id}`;
+    }
+    throw new AppError(`Unsupported file type: ${file.mimetype}`, 400);
+};
+
+const getFileDestination = (file: Express.Multer.File, req: any): string => {
+    switch (req.url) {
+        case "/upload":
+            return handleUploadRoute(file, req);
+        case "/upload/user-data":
+            return handleUserDataRoute(file, req);
+        case "/upload/exam-data":
+            return handleExamDataRoute(file, req);
+        default:
+            throw new AppError(`Unsupported route: ${req.url}`, 400);
+    }
+};
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const environment = process.env.NODE_ENV
-        const mainPath: any = environment === 'development' ? process.env.content_path : "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf"
-            ;
-        if (!fs.existsSync(mainPath)) {
-            fs.mkdirSync(mainPath, { recursive: true });
-        }
-
-        if (file.mimetype === "application/pdf") {
-            const pathToSave = `${mainPath}/uploadeddocument`
-            if (!fs.existsSync(pathToSave)) {
-                fs.mkdirSync(pathToSave, { recursive: true });
-            }
-            cb(null, pathToSave);
-        } else if (file.mimetype === "video/mp4") {
-            if (!req.body?.org_id) {
-                return cb(new Error("org_id is required"), "");
-            }
-            const pathToSave = `${mainPath}/pdf/${req.body.org_id}`
-            if (!fs.existsSync(pathToSave)) {
-                fs.mkdirSync(pathToSave, { recursive: true });
-            }
-            cb(null, pathToSave);
-        }
-
-        else if (file.mimetype === "application/vnd.ms-excel" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-            let pathToSave = ""
-            if (!req.body?.exam_id) {
-                pathToSave = `${mainPath}/excel/user/${req.body.batch_name}`
-                if (!fs.existsSync(pathToSave)) {
-                    fs.mkdirSync(pathToSave, { recursive: true });
-                }
-            }else{
-                pathToSave = `${mainPath}/excel/questions/${req.body.exam_id}`
-                if (!fs.existsSync(pathToSave)) {
-                    fs.mkdirSync(pathToSave, { recursive: true });
-                }
-            }
-
-            cb(null, pathToSave);
-        } else {
-            cb(new Error("Unsupported file type!"), "");
+        try {
+            const dest = getFileDestination(file, req);
+            createDirectory(dest);
+            cb(null, dest);
+        } catch (error: any) {
+            cb(error, "");
         }
     },
     filename: async (req, file, cb) => {
         try {
-            // Make the function async and await the sequence
-
-
             if (file.mimetype === "application/pdf" || file.mimetype === "video/mp4") {
                 const sequence = await getNextSequence(req.body.org_id);
                 const ext = path.extname(file.originalname);
                 cb(null, `${sequence ? sequence + 1 : 1}${ext}`);
             } else {
-                const ext = path.extname(file.originalname);
-                const date = new Date();
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const hours = date.getHours();
-                const minutes = date.getMinutes();
-                const seconds = date.getSeconds();
-                cb(null, `${year}-${month}-${day}-${hours}-${minutes}-${seconds}${ext}`);
-                // cb(null, `${}${ext}`);
+                cb(null, generateTimestampedFilename(file.originalname));
             }
         } catch (error: any) {
             cb(error, "");
@@ -76,21 +98,6 @@ const storage = multer.diskStorage({
     },
 });
 
-// Define file filter
-// const fileFilter = (req, file, cb) => {
-//     if (file.mimetype === "application/pdf" || file.mimetype === "video/mp4") {
-//         cb(null, true);
-//     } else {
-//         cb(new Error("Only PDF and MP4 files are allowed!"));
-//     }
-// };
-
-// Configure multer upload
-const upload = multer({
-    storage,
-    // limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB file size limit
-    // fileFilter,
-});
+const upload = multer({ storage });
 
 export { upload };
-

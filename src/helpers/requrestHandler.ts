@@ -24,8 +24,8 @@ export const deletehandler = (serviceMethod: (id: string) => Promise<any>, entit
 
             const result = await serviceMethod(id);
             res.status(200).json(result);
-        } catch (error) {
-            return next(new AppError('Internal server error', 500));
+        } catch (error:any) {
+            return next(new AppError(error.message, 400));
         }
     };
 };
@@ -40,8 +40,8 @@ export const updateHandler=(serviceMethod:(id:string,body:any)=>Promise<any>,ent
             const body=req.body;
             const result = await serviceMethod(id,body);
             res.status(200).json(result);
-        } catch (error) {
-            return next(new AppError('Internal server error', 500));
+        } catch (error:any) {
+            return next(new AppError(error.message, 400));
         }
     }
 }

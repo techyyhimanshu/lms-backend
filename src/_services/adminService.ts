@@ -383,6 +383,58 @@ const getbatchname = async (courseid: string, companyid: string): Promise<any> =
         throw er;
     }
 };
+const getuser = async (firstuser: any, lastuser: any): Promise<any> => {
+    let res: any = [];
+    try {
+
+        //debugger
+
+        return await sequelize.query(`select * from STUDENT where studentid between ${firstuser} and ${lastuser}`, {
+            // replacements: {
+
+            // },
+            type: QueryTypes.SELECT
+
+        });
+
+        // res = result[0][0];
+
+        //  return res;
+    }
+    catch (err) {
+        let er: any = err;
+        throw er;
+    }
+};
+const activateuser = async (data: any): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `CALL activateuser(:STUDENTID, :URNNO, :NAME, :BRANCH, :CITY, :STATE, :EMAILID, :MOBILENO, :REFFEREDBY, :APPLICATIONNO, :CODE, :ACODE, :IPM)`,
+            {
+                replacements: {
+                    STUDENTID: data.STUDENTID,
+                    URNNO: data.URNNO,
+                    NAME: data.NAME,
+                    BRANCH: data.BRANCH,
+                    CITY: data.CITY,
+                    STATE: data.STATE,
+                    EMAILID: data.EMAILID,
+                    MOBILENO: data.MOBILENO,
+                    REFFEREDBY: data.REFFEREDBY,
+                    APPLICATIONNO: data.APPLICATIONNO,
+                    CODE: data.CODE,
+                    ACODE: data.ACODE,
+                    IPM: data.IPM,
+                },
+                type: QueryTypes.RAW, // Use RAW for stored procedure calls
+            }
+        );
+        return result;
+    } catch (err) {
+        const er: any = err;
+        throw er;
+    }
+};
 
 const uploadPdfService = async (data: any): Promise<any> => {
     try {
@@ -444,134 +496,90 @@ const uploadVideoService = async (item: any): Promise<any> => {
         throw error;
     }
 };
-const addNewCourseService = async (user: any): Promise<any> => {
+
+
+
+// ---------------------Creation services----------------
+const validateRequiredFields = (data: any, requiredFields: string[]): void => {
+    for (const field of requiredFields) {
+        if (!data[field]) {
+            throw new AppError(`Missing required field: ${field}`, 400);
+        }
+    }
+};
+const requiredFieldsForCreation = [
+    "orgStructureName",
+    "parentKey",
+    "position",
+    "typeOfOrg",
+    "hierarchyCode",
+    "timePeriodMin",
+    "timePeriodMax",
+    "mandatoryToNext",
+    "groupType",
+    "orgStructureHName",
+];
+const executeOrgStructureProcedure = async (
+    actionType: string,
+    data: any
+): Promise<any> => {
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
                 :action_type,
                 :p_ORGSTRUCTUREID,
-                 :p_ORGSTRUCTURENAME,:p_PARENTKEY, :p_POSITION, :p_TYPEOFORG, 
-                :p_HIERARCHYCODE, :p_TIMEPERIODMIN, :p_TIMEPERIODMAX, :p_MANDATORYTONEXT, :p_GROUPTYPE,:p_NODEKEY, :p_ORGSTRUCTUREHNAME
+                :p_ORGSTRUCTURENAME,
+                :p_PARENTKEY,
+                :p_POSITION,
+                :p_TYPEOFORG,
+                :p_HIERARCHYCODE,
+                :p_TIMEPERIODMIN,
+                :p_TIMEPERIODMAX,
+                :p_MANDATORYTONEXT,
+                :p_GROUPTYPE,
+                :p_NODEKEY,
+                :p_ORGSTRUCTUREHNAME
             )`,
             {
                 replacements: {
-                    action_type: "insert_new_course",
-                    p_ORGSTRUCTURENAME: user.orgStructureName,
+                    action_type: actionType,
                     p_ORGSTRUCTUREID: null,
-                    p_PARENTKEY: null,
-                    p_POSITION: user.position,
-                    p_TYPEOFORG: user.typeOfOrg,
-                    p_HIERARCHYCODE: user.hierarchyCode,
-                    p_TIMEPERIODMIN: user.timePeriodMin,
-                    p_TIMEPERIODMAX: user.timePeriodMax,
-                    p_MANDATORYTONEXT: user.mandatoryToNext,
-                    p_GROUPTYPE: user.groupType,
+                    p_ORGSTRUCTURENAME: data.orgStructureName,
+                    p_PARENTKEY: data.parentKey ?? null,
+                    p_POSITION: data.position,
+                    p_TYPEOFORG: data.typeOfOrg,
+                    p_HIERARCHYCODE: data.hierarchyCode,
+                    p_TIMEPERIODMIN: data.timePeriodMin,
+                    p_TIMEPERIODMAX: data.timePeriodMax,
+                    p_MANDATORYTONEXT: data.mandatoryToNext,
+                    p_GROUPTYPE: data.groupType,
                     p_NODEKEY: null,
-                    p_ORGSTRUCTUREHNAME: user.orgStructureHName,
+                    p_ORGSTRUCTUREHNAME: data.orgStructureHName,
                 },
                 type: QueryTypes.RAW, // Use RAW for stored procedure calls
             }
         );
-        console.log(result)
         return result;
+    } catch (err) {
+        console.log(err);
+        throw err;
     }
-    catch (err) {
-        let er: any = err;
-        throw er;
-    }
-
 };
+const addNewCourseService = async (data: any): Promise<any> => {
+    validateRequiredFields(data, requiredFieldsForCreation);
+    return executeOrgStructureProcedure("insert_new_course", data);
+};
+
 const addNewChapterService = async (data: any): Promise<any> => {
-    try {
-        const requiredFields = [
-            'orgStructureName',
-            'parentKey',
-            'position',
-            'typeOfOrg',
-            'hierarchyCode',
-            'timePeriodMin',
-            'timePeriodMax',
-            'mandatoryToNext',
-            'groupType',
-            'orgStructureHName',
-        ];
-        for (const field of requiredFields) {
-            if (!data[field]) {
-                throw new AppError(`Missing required field: ${field}`,400);
-            }
-        }
-        const result = await sequelize.query(
-            `CALL sp_orgstructure(
-                :action_type,:p_ORGSTRUCTUREID,
-                 :p_ORGSTRUCTURENAME,:p_PARENTKEY, :p_POSITION, :p_TYPEOFORG, 
-                :p_HIERARCHYCODE, :p_TIMEPERIODMIN, :p_TIMEPERIODMAX, :p_MANDATORYTONEXT, :p_GROUPTYPE,:p_NODEKEY, :p_ORGSTRUCTUREHNAME
-            )`,
-            {
-                replacements: {
-                    action_type: "insert_new_chapter",
-                    p_ORGSTRUCTUREID: null,
-
-                    p_ORGSTRUCTURENAME: data.orgStructureName,
-                    p_PARENTKEY: data.parentKey,
-                    p_POSITION: data.position,
-                    p_TYPEOFORG: data.typeOfOrg,
-                    p_HIERARCHYCODE: data.hierarchyCode,
-                    p_TIMEPERIODMIN: data.timePeriodMin,
-                    p_TIMEPERIODMAX: data.timePeriodMax,
-                    p_MANDATORYTONEXT: data.mandatoryToNext,
-                    p_GROUPTYPE: data.groupType,
-                    p_NODEKEY: null,
-                    p_ORGSTRUCTUREHNAME: data.orgStructureHName,
-                },
-                type: QueryTypes.RAW, // Use RAW for stored procedure calls
-            }
-        );
-        console.log(result)
-        return result;
-    }
-    catch (err) {
-        let er: any = err;
-        throw er;
-    }
-
+    validateRequiredFields(data, requiredFieldsForCreation);
+    return executeOrgStructureProcedure("insert_new_chapter", data);
 };
+
 const addNewExamService = async (data: any): Promise<any> => {
-    try {
-        const result = await sequelize.query(
-            `CALL sp_orgstructure(
-                :action_type,:p_ORGSTRUCTUREID,
-                 :p_ORGSTRUCTURENAME,:p_PARENTKEY, :p_POSITION, :p_TYPEOFORG, 
-                :p_HIERARCHYCODE, :p_TIMEPERIODMIN, :p_TIMEPERIODMAX, :p_MANDATORYTONEXT, :p_GROUPTYPE,:p_NODEKEY, :p_ORGSTRUCTUREHNAME
-            )`,
-            {
-                replacements: {
-                    action_type: "insert_new_exam",
-                    p_ORGSTRUCTUREID: null,
-                    p_ORGSTRUCTURENAME: data.orgStructureName,
-                    p_PARENTKEY: data.parentKey,
-                    p_POSITION: data.position,
-                    p_TYPEOFORG: data.typeOfOrg,
-                    p_HIERARCHYCODE: data.hierarchyCode,
-                    p_TIMEPERIODMIN: data.timePeriodMin,
-                    p_TIMEPERIODMAX: data.timePeriodMax,
-                    p_MANDATORYTONEXT: data.mandatoryToNext,
-                    p_GROUPTYPE: data.groupType,
-                    p_NODEKEY: null,
-                    p_ORGSTRUCTUREHNAME: data.orgStructureHName,
-                },
-                type: QueryTypes.RAW, // Use RAW for stored procedure calls
-            }
-        );
-        console.log(result)
-        return result;
-    }
-    catch (err) {
-        console.log(err)
-        let er: any = err;
-        throw er;
-    }
-
+    validateRequiredFields(data, requiredFieldsForCreation);
+    return executeOrgStructureProcedure("insert_new_exam", data);
 };
+
 
 const addNewQuestionService = async (data: any): Promise<any> => {
     try {
@@ -607,184 +615,14 @@ const addNewQuestionService = async (data: any): Promise<any> => {
 
 };
 
-const getuser = async (firstuser: any, lastuser: any): Promise<any> => {
-    let res: any = [];
-    try {
-
-        //debugger
-
-        return await sequelize.query(`select * from STUDENT where studentid between ${firstuser} and ${lastuser}`, {
-            // replacements: {
-
-            // },
-            type: QueryTypes.SELECT
-
-        });
-
-        // res = result[0][0];
-
-        //  return res;
-    }
-    catch (err) {
-        let er: any = err;
-        throw er;
-    }
-};
-/*
-const activateuser = async (data: any): Promise<any> => {
-    try {
-        const result = await sequelize.query(
-            `CALL activateuser(:STUDENTID,:URNNO,:NAME,:BRANCH,:CITY,:STATE,:EMAILID,:MOBILENO,:REFFEREDBY,:APPLICATIONNO,:CODE,:ACODE,:IPM)`,
-            {
-                replacements: {
-                    P_STUDENTID: data.STUDENTID,
-                    p_URNNO: data.URNNO,
-                    p_NAME: data.NAME,
-                    p_BRANCH: data.BRANCH,
-                    p_CITY: data.CITY,
-                    p_STATE: data.STATE,
-                    p_EMAILID: data.EMAILID,
-                    p_MOBILENO: data.MOBILENO,
-                    p_REFFEREDBY: data.REFFEREDBY,
-                    p_APPLICATIONNO: data.APPLICATIONNO,
-                    p_CODE: data.CODE,
-                    p_ACODE: data.ACODE,
-                    p_IPM: data.IPM,
-                },
-                type: QueryTypes.RAW, // Use RAW for stored procedure calls
-            }
-        );
-        return result;
-    }
-    catch (err) {
-        let er: any = err;
-        throw er;
-    }
-
-};*/
-
-const activateuser = async (data: any): Promise<any> => {
-    try {
-        const result = await sequelize.query(
-            `CALL activateuser(:STUDENTID, :URNNO, :NAME, :BRANCH, :CITY, :STATE, :EMAILID, :MOBILENO, :REFFEREDBY, :APPLICATIONNO, :CODE, :ACODE, :IPM)`,
-            {
-                replacements: {
-                    STUDENTID: data.STUDENTID,
-                    URNNO: data.URNNO,
-                    NAME: data.NAME,
-                    BRANCH: data.BRANCH,
-                    CITY: data.CITY,
-                    STATE: data.STATE,
-                    EMAILID: data.EMAILID,
-                    MOBILENO: data.MOBILENO,
-                    REFFEREDBY: data.REFFEREDBY,
-                    APPLICATIONNO: data.APPLICATIONNO,
-                    CODE: data.CODE,
-                    ACODE: data.ACODE,
-                    IPM: data.IPM,
-                },
-                type: QueryTypes.RAW, // Use RAW for stored procedure calls
-            }
-        );
-        return result;
-    } catch (err) {
-        const er: any = err;
-        throw er;
-    }
-};
-
-
 // ---------------Update services------------------
-const updateCourseService = async (id: any, user: any): Promise<any> => {
-    try {
-        const result = await sequelize.query(
-            `CALL sp_orgstructure(
-          :action_type,
-          :p_ORGSTRUCTUREID,
-          :p_ORGSTRUCTURENAME,
-          :p_PARENTKEY,
-          :p_POSITION,
-          :p_TYPEOFORG,
-          :p_HIERARCHYCODE,
-          :p_TIMEPERIODMIN,
-          :p_TIMEPERIODMAX,
-          :p_MANDATORYTONEXT,
-          :p_GROUPTYPE,
-          :p_NODEKEY,
-          :p_ORGSTRUCTUREHNAME
-        )`,
-            {
-                replacements: {
-                    action_type: "update_course",
-                    p_ORGSTRUCTUREID: id,
-                    p_ORGSTRUCTURENAME: user.orgStructureName,
-                    p_PARENTKEY: null,
-                    p_POSITION: null,
-                    p_TYPEOFORG: null,
-                    p_HIERARCHYCODE: null,
-                    p_TIMEPERIODMIN: id,
-                    p_TIMEPERIODMAX: user.timePeriodMax,
-                    p_MANDATORYTONEXT: null,
-                    p_GROUPTYPE: null,
-                    p_NODEKEY: null,
-                    p_ORGSTRUCTUREHNAME: null
-                },
-                type: QueryTypes.RAW,
-            }
-        );
-        return result;
-    }
-    catch (err) {
-        let er: any = err;
-        throw er;
-    }
-};
-const updateChapterService = async (id: any, user: any): Promise<any> => {
-    try {
-        const result = await sequelize.query(
-            `CALL sp_orgstructure(
-          :action_type,
-          :p_ORGSTRUCTUREID,
-          :p_ORGSTRUCTURENAME,
-          :p_PARENTKEY,
-          :p_POSITION,
-          :p_TYPEOFORG,
-          :p_HIERARCHYCODE,
-          :p_TIMEPERIODMIN,
-          :p_TIMEPERIODMAX,
-          :p_MANDATORYTONEXT,
-          :p_GROUPTYPE,
-          :p_NODEKEY,
-          :p_ORGSTRUCTUREHNAME
-        )`,
-            {
-                replacements: {
-                    action_type: "update_chapter",
-                    p_ORGSTRUCTUREID: id,
-                    p_ORGSTRUCTURENAME: user.orgStructureName,
-                    p_PARENTKEY: null,
-                    p_POSITION: null,
-                    p_TYPEOFORG: null,
-                    p_HIERARCHYCODE: null,
-                    p_TIMEPERIODMIN: null,
-                    p_TIMEPERIODMAX: user.timePeriodMax,
-                    p_MANDATORYTONEXT: null,
-                    p_GROUPTYPE: null,
-                    p_NODEKEY: null,
-                    p_ORGSTRUCTUREHNAME: null
-                },
-                type: QueryTypes.RAW,
-            }
-        );
-        return result;
-    }
-    catch (err) {
-        let er: any = err;
-        throw er;
-    }
-};
 
-const updateExamService = async (id: any, data: any): Promise<any> => {
+const requiredFieldsForUpdation = [
+    "orgStructureName",
+    "timePeriodMax",
+];
+const executeOrgStructureProcedureForUpdation=async (actionType: string,data: any,id:number):Promise<any>=>{
+    validateRequiredFields(data, requiredFieldsForUpdation);
     try {
         const result = await sequelize.query(
             `CALL sp_orgstructure(
@@ -804,14 +642,14 @@ const updateExamService = async (id: any, data: any): Promise<any> => {
         )`,
             {
                 replacements: {
-                    action_type: "update_exam",
+                    action_type: actionType,
                     p_ORGSTRUCTUREID: id,
                     p_ORGSTRUCTURENAME: data.orgStructureName,
                     p_PARENTKEY: null,
                     p_POSITION: null,
                     p_TYPEOFORG: null,
                     p_HIERARCHYCODE: null,
-                    p_TIMEPERIODMIN: null,
+                    p_TIMEPERIODMIN: id,
                     p_TIMEPERIODMAX: data.timePeriodMax,
                     p_MANDATORYTONEXT: null,
                     p_GROUPTYPE: null,
@@ -827,9 +665,18 @@ const updateExamService = async (id: any, data: any): Promise<any> => {
         let er: any = err;
         throw er;
     }
+}
+const updateCourseService = async (id: any, data: any): Promise<any> => {
+    return  executeOrgStructureProcedureForUpdation("update_course",data,id)
+};
+const updateChapterService = async (id: any, data: any): Promise<any> => {
+    return  executeOrgStructureProcedureForUpdation("update_chapter",data,id)
+};
+const updateExamService = async (id: any, data: any): Promise<any> => {
+    return  executeOrgStructureProcedureForUpdation("update_exam",data,id)
 };
 
-
+// ----------------Delete services----------------
 
 const deleteCourseService = async (id: any): Promise<any> => {
     const transaction = await sequelize.transaction();

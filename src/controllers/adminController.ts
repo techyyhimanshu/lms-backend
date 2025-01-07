@@ -273,49 +273,6 @@ const uploadPdf: RequestHandler = async (req, res, next) => {
 
 };
 
-// const addNewCourse: RequestHandler = async (req, res, next) => {
-
-//     //debugger
-//     let result: any;
-//     try {
-//         result = await adminService.addNewCourseService(req.body);
-//         res.status(200).json(response.success(result));
-//     } catch (error) {
-//         var er: any = error
-//         next(createHttpError('500', er.message));
-//     }
-
-// };
-const addNewCourse=createHandler(adminService.addNewCourseService)
-
-const addNewChapter=createHandler(adminService.addNewChapterService)
-// const addNewChapter: RequestHandler = async (req, res, next) => {
-
-//     //debugger
-//     let result: any;
-//     try {
-//         result = await adminService.addNewChapterService(req.body);
-//         res.status(200).json(response.success(result));
-//     } catch (error) {
-//         var er: any = error
-//         next(createHttpError('500', er.message));
-//     }
-
-// };
-const addNewExam: RequestHandler = async (req, res, next) => {
-
-    //debugger
-    let result: any;
-    try {
-        result = await adminService.addNewExamService(req.body);
-        res.status(200).json(response.success(result));
-    } catch (error) {
-        var er: any = error
-        next(createHttpError('500', er.message));
-    }
-
-};
-
 const addNewQuestion: RequestHandler = async (req, res, next) => {
 
     //debugger
@@ -395,6 +352,13 @@ const getExamQuestions: RequestHandler = async (req, res, next) => {
     }
 };
 
+// --------------Create controllers---------------
+const addNewCourse=createHandler(adminService.addNewCourseService)
+
+const addNewChapter=createHandler(adminService.addNewChapterService)
+
+const addNewExam=createHandler(adminService.addNewExamService)
+
 // --------------Update controllers---------------
 const updateCourse=updateHandler(adminService.updateCourseService,'Course')
 const updateChapter=updateHandler(adminService.updateChapterService,'Chapter')
@@ -406,38 +370,6 @@ const deleteCourse = deletehandler(adminService.deleteCourseService, 'Course');
 const deleteChapter = deletehandler(adminService.deleteChapterService, 'Chapter');
 const deleteExam = deletehandler(adminService.deleteExamService, 'Exam');
 
-// const deleteChapter: RequestHandler = async (req, res, next) => {
-
-//     //debugger
-//     let result: any;
-//     try {
-//         if (!req.params.id) {
-//             return next(new AppError('ChapterId is required', 400));
-//         }
-//         result = await adminService.deleteChapterService(req.params.id);
-//         res.status(200).json(response.success(result));
-//     } catch (error) {
-//         var er: any = error
-//         return next(new AppError('Internal server error', 500));
-//     }
-
-// };
-// const deleteExam: RequestHandler = async (req, res, next) => {
-
-//     //debugger
-//     let result: any;
-//     try {
-//         if (!req.params.id) {
-//             return next(new AppError('ExamId is required', 400));
-//         }
-//         result = await adminService.deleteExamService(req.params.id);
-//         res.status(200).json(response.success(result));
-//     } catch (error) {
-//         var er: any = error
-//         return next(new AppError('Internal server error', 500));
-//     }
-
-// };
 const getbatch: RequestHandler = async (req, res, next) => {
     try {
         //  console.log(" cntrl run");
