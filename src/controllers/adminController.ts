@@ -131,12 +131,12 @@ const createnewuser: RequestHandler = async (req, res, next) => {
         let result: any = await adminService.createnewuser(req.body.courseid, req.body.companyid, userid, req.body.batchname, req.body.noofuser)
 
         let changeDetail: any = result;
-        sendSuccessResponse(res,'',changeDetail)
+        sendSuccessResponse(res, '', changeDetail)
 
     }
     catch (err) {
         let er: any = err;
-        return next(new AppError( er.message,400));
+        return next(new AppError(er.message, 400));
     }
 
 };
@@ -243,7 +243,7 @@ const uploadPdf: RequestHandler = async (req, res, next) => {
                 }
             })
             const result = await adminService.uploadPdfService(data)
-            sendSuccessResponse(res,'',result);
+            sendSuccessResponse(res, '', result);
         }
         else {
 
@@ -265,13 +265,13 @@ const uploadPdf: RequestHandler = async (req, res, next) => {
             }
 
             const result = await adminService.uploadVideoService(data)
-            sendSuccessResponse(res,'',result);
+            sendSuccessResponse(res, '', result);
         }
 
 
 
     }
-    catch (error:any) {
+    catch (error: any) {
         return next(new AppError(error.message, 400));
     }
 
@@ -356,6 +356,16 @@ const updateCourse = updateHandler(adminService.updateCourseService, 'Course')
 const updateChapter = updateHandler(adminService.updateChapterService, 'Chapter')
 
 const updateExam = updateHandler(adminService.updateExamService, 'Exam')
+const updateUser: RequestHandler = async (req, res, next) => {
+    try {
+        let result: any = await adminService.updateUserService(req.params.id, req.body)
+        sendSuccessResponse(res, 'User updated successfully', result);
+    }
+    catch (err) {
+        let er: any = err;
+        return next( new AppError(er.message,400));
+    }
+}
 
 // --------------Delete controllers---------------
 const deleteCourse = deletehandler(adminService.deleteCourseService, 'Course');
@@ -461,7 +471,16 @@ const bulkUploadExamQuestionsData: RequestHandler = async (req, res, next) => {
     //     }
     // }
 };
-
+const getUser: RequestHandler = async (req, res, next) => {
+    try {
+        let result: any = await adminService.getUserService(req.params.id)
+        sendSuccessResponse(res, '', result);
+    }
+    catch (err) {
+        let er: any = err;
+        return next( new AppError(er.message,400));
+    }
+}
 export default {
 
     viewUploadedData,
@@ -492,6 +511,8 @@ export default {
     bulkUploadUserData,
     bulkUploadExamQuestionsData,
     deleteExam,
-    updateExam
+    updateExam,
+    updateUser,
+    getUser
 
 }

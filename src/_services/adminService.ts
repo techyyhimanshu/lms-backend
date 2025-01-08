@@ -343,7 +343,7 @@ const chapter = async (courseid: any): Promise<any> => {
 
         return await sequelize.query(`select orgstructureid as chapterid,orgstructurename as coursename,GROUPTYPE, TIMEPERIODMAX as total_course_time,
 (select count(*) from CONTENTSTATIC a where a.ORGSTRUCTUREID=b.orgstructureid) as pages from ORGSTRUCTURE b
-where TIMEPERIODMIN='${courseid}'`, {
+where TIMEPERIODMIN='${courseid}' order by NODEKEY`, {
             // replacements: {
 
             // },
@@ -462,7 +462,7 @@ const uploadPdfService = async (data: any): Promise<any> => {
             );
         }
 
-        return {status:1, message: 'PDF Uploaded successfully', };
+        return { status: 1, message: 'PDF Uploaded successfully', };
     } catch (error) {
         console.error('Error during bulk insert execution:', error);
         throw error;
@@ -490,7 +490,7 @@ const uploadVideoService = async (item: any): Promise<any> => {
             }
         );
 
-        return {status:1, message: 'Video Uploaded successfully', };
+        return { status: 1, message: 'Video Uploaded successfully', };
     } catch (error) {
         console.error('Error during uploading video:', error);
         throw error;
@@ -621,7 +621,7 @@ const requiredFieldsForUpdation = [
     "orgStructureName",
     "timePeriodMax",
 ];
-const executeOrgStructureProcedureForUpdation=async (actionType: string,data: any,id:number):Promise<any>=>{
+const executeOrgStructureProcedureForUpdation = async (actionType: string, data: any, id: number): Promise<any> => {
     validateRequiredFields(data, requiredFieldsForUpdation);
     try {
         const result = await sequelize.query(
@@ -667,14 +667,87 @@ const executeOrgStructureProcedureForUpdation=async (actionType: string,data: an
     }
 }
 const updateCourseService = async (id: any, data: any): Promise<any> => {
-    return  executeOrgStructureProcedureForUpdation("update_course",data,id)
+    return executeOrgStructureProcedureForUpdation("update_course", data, id)
 };
 const updateChapterService = async (id: any, data: any): Promise<any> => {
-    return  executeOrgStructureProcedureForUpdation("update_chapter",data,id)
+    return executeOrgStructureProcedureForUpdation("update_chapter", data, id)
 };
 const updateExamService = async (id: any, data: any): Promise<any> => {
-    return  executeOrgStructureProcedureForUpdation("update_exam",data,id)
+    return executeOrgStructureProcedureForUpdation("update_exam", data, id)
 };
+
+const updateUserService = async (id: any, data: any): Promise<any> => {
+    try {
+        // UPDATE student SET 
+        //         // BATCHID = :BATCHID,
+        //         NAME = :NAME,
+        //         // ENTRYDATE = :ENTRYDATE,
+        //         // EXPIRYDATE = :EXPIRYDATE,
+        //         // TRAININGSTARTDATE = :TRAININGSTARTDATE,
+        //         // TRAININGENDDATE = :TRAININGENDDATE,
+        //         // TCCDATE = :TCCDATE,
+        //         // COURSEID = :COURSEID,
+        //         // BRANCH = :BRANCH,
+        //         CITY = :CITY,
+        //         STATE = :STATE,
+        //         // SPONSOR = :SPONSOR,
+        //         EMAILID = :EMAILID,
+        //         MOBILENO = :MOBILENO,
+        //         // REFFEREDBY = :REFFEREDBY,
+        //         // APPLICATIONNO = :APPLICATIONNO,
+        //         // CERTIFICATENO = :CERTIFICATENO,
+        //         // IPM = :IPM,
+        //     WHERE LOGINID = :STUDENTID or URNNO=:URNNO
+        const result = await sequelize.query(
+            `UPDATE student SET 
+                NAME = :NAME,
+                CITY = :CITY,
+                STATE = :STATE,
+                EMAILID = :EMAILID,
+                MOBILENO = :MOBILENO
+            WHERE LOGINID = :LOGINID or URNNO=:URNNO AND ROLE='USER'`,
+            {
+                replacements: {
+                    LOGINID: id,
+                    URNNO: id,
+                    // BATCHID: data.BATCHID,
+                    // LOGINID: data.LOGINID,
+                    // URNNO: data.URNNO,
+                    // PASSWORD: data.PASSWORD,
+                    // DPASSWORD: data.DPASSWORD,
+                    NAME: data.name,
+                    // ENTRYDATE: data.ENTRYDATE,
+                    // // EXPIRYDATE: data.EXPIRYDATE,
+                    // TRAININGSTARTDATE: data.TRAININGSTARTDATE,
+                    // TRAININGENDDATE: data.TRAININGENDDATE,
+                    // TCCDATE: data.TCCDATE,
+                    // ROLE: data.ROLE,
+
+                    // COURSEID: data.COURSEID,
+                    // BRANCH: data.BRANCH,
+                    CITY: data.city,
+                    STATE: data.state,
+                    // SPONSOR: data.SPONSOR,
+                    EMAILID: data.email,
+                    MOBILENO: data.mobile,
+                    // REFFEREDBY: data.REFFEREDBY,
+                    // APPLICATIONNO: data.APPLICATIONNO,
+                    // CODE: data.CODE,
+                    // ACODE: data.ACODE,
+                    // LOGINS: data.LOGINS,
+                    // CERTIFICATENO: data.CERTIFICATENO,
+                    // IPM: data.IPM || 'N',  // If IPM is not provided, default it to 'N'
+                    // CREATEDBY: data.CREATEDBY
+                },
+                type: QueryTypes.UPDATE
+            });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(error.message, 400)
+    }
+};
+
 
 // ----------------Delete services----------------
 
@@ -969,6 +1042,25 @@ const bulkUploadExamQuestionsDataService = async (data: Array<Object>, exam_id: 
     }
 };
 
+const getUserService = async (id: any): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `select NAME,CITY,STATE,EMAILID,MOBILENO from student
+            WHERE LOGINID = :LOGINID or URNNO=:URNNO AND ROLE='USER'`,
+            {
+                replacements: {
+                    LOGINID: id,
+                    URNNO: id,
+                },
+                type: QueryTypes.SELECT
+            });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(error.message, 400)
+    }
+};
+
 export default {
 
     registerbatch,
@@ -1000,5 +1092,7 @@ export default {
     bulkUploadUserDataService,
     bulkUploadExamQuestionsDataService,
     deleteExamService,
-    updateExamService
+    updateExamService,
+    updateUserService,
+    getUserService
 }
