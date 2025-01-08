@@ -1,31 +1,31 @@
-const success = (results: any,token?:any) => {
-    if(token != undefined && token.length > 0)
+const success = (results: any, token?: any) => {
+    if (token != undefined && token.length > 0)
 
-    return {
-        res:results,
-        token: token
-    };
+        return {
+            res: results,
+            token: token
+        };
 
     else
-return results
+        return results
     // return {
     //     res:results
     // };
 };
 
-const payload = (results: any,token?:any) => {
-    if(token != undefined && token.length > 0)
+const payload = (results: any, token?: any) => {
+    if (token != undefined && token.length > 0)
 
-    return {
-        payload:results,
-        token: token
-    };
+        return {
+            payload: results,
+            token: token
+        };
 
     else
 
-    return {
-        payload:results
-    };
+        return {
+            payload: results
+        };
 };
 
 const asstring = (results: string) => {
@@ -53,8 +53,8 @@ const error = (error: string) => {
 
     let err: string = 'true';
     return {
-        error:err,
-        message:error
+        error: err,
+        message: error
     };
 };
 

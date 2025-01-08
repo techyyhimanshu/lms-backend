@@ -41,6 +41,7 @@
     "http-error": "^0.0.6",
     "http-errors": "^2.0.0",
     "ifsc": "^2.0.22",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
     "mqtt": "^5.1.4",

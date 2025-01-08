@@ -1,14 +1,14 @@
 import { RequestHandler } from 'express';
 import { AppError } from './customError';
-import adminService from '../_services/adminService';
+import { sendSuccessResponse } from './successResponse';
 // import response from './utils/response';
 
-export const createHandler=(serviceMethod:(body:Object)=>Promise<any>):RequestHandler=>{
+export const createHandler=(serviceMethod:(body:Object)=>Promise<any>,entityName:string):RequestHandler=>{
     return async(req,res,next)=>{
         try {
             const body=req.body;
             const result = await serviceMethod(body);
-            res.status(200).json(result);
+            sendSuccessResponse(res, `${entityName} created successfully`);
         } catch (error:any) {
             return next(new AppError(error.message, 400));
         }
@@ -23,7 +23,7 @@ export const deletehandler = (serviceMethod: (id: string) => Promise<any>, entit
             }
 
             const result = await serviceMethod(id);
-            res.status(200).json(result);
+            sendSuccessResponse(res, `${entityName} deleted successfully`);
         } catch (error:any) {
             return next(new AppError(error.message, 400));
         }
@@ -39,7 +39,8 @@ export const updateHandler=(serviceMethod:(id:string,body:any)=>Promise<any>,ent
             }
             const body=req.body;
             const result = await serviceMethod(id,body);
-            res.status(200).json(result);
+            sendSuccessResponse(res, `${entityName} updated successfully`);
+            
         } catch (error:any) {
             return next(new AppError(error.message, 400));
         }

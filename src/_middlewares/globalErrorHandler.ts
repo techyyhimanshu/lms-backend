@@ -8,7 +8,8 @@ const logErrorToDatabase = async (log: { method: string; url: string; status: nu
     try {
         console.log("Inserting log into database:", log);
         await sequelize.query(
-            `INSERT INTO error_logs (method, url, status, message) VALUES (:method, :url, :status, :message)`,
+            `INSERT INTO error_logs (method, url, status, message,environment,error_type) VALUES (:method, :url, :status, :message,:environment,
+            :error_type)`,
             {
                 replacements: log,
                 type: QueryTypes.INSERT,
@@ -43,6 +44,8 @@ export const globalErrorHandler = (
         url: req.url,
         status: statusCode,
         message: message,
+        environment: process.env.NODE_ENV,
+        error_type: err.name
     };
 
     logErrorToDatabase(log); // Insert error log into the database

@@ -1,8 +1,7 @@
 
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import * as config from 'dotenv'
+import { AppError } from '../helpers/customError';
 
 // export default function authToken(req: Request, res: Response, next: NextFunction) {
 //     const secretKey = process.env.ACCESS_TOKEN as string;
@@ -37,15 +36,14 @@ const authToken: RequestHandler = async (req, res, next) => {
     // console.log('test');
 
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return next(new AppError("Unauthorized", 401))
     }
 
     jwt.verify(token, secretKey, async (err: jwt.VerifyErrors | null, user: any): Promise<any> => {
         if (err) {
-            return res.status(403).json({ message: 'Forbidden' });
+            return next(new AppError("Forbidden", 403))
         }
 
-        console.log('test user data', user.data);
 
 
         // const check = await bcrypt.compare(userId, user.data);
@@ -56,7 +54,7 @@ const authToken: RequestHandler = async (req, res, next) => {
             next();
         } else {
             console.log("false")
-            return res.status(401).json({ message: 'User is not authorized' });
+            return next(new AppError("User is not authorized", 401))
         }
 
 

@@ -462,7 +462,7 @@ const uploadPdfService = async (data: any): Promise<any> => {
             );
         }
 
-        return { message: 'PDF Uploaded successfully', };
+        return {status:1, message: 'PDF Uploaded successfully', };
     } catch (error) {
         console.error('Error during bulk insert execution:', error);
         throw error;
@@ -490,7 +490,7 @@ const uploadVideoService = async (item: any): Promise<any> => {
             }
         );
 
-        return { message: 'Video Uploaded successfully', };
+        return {status:1, message: 'Video Uploaded successfully', };
     } catch (error) {
         console.error('Error during uploading video:', error);
         throw error;

@@ -4,16 +4,22 @@ import fs from "fs";
 import { getNextSequence } from "../_services/getNextSequence";
 import { AppError } from "../helpers/customError";
 
+// Helper function to create directories
 const createDirectory = (dirPath: string): void => {
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
     }
 };
 
+// Helper function to get the main path based on the environment
 const getMainPath = (): string => {
-    return process.env.content_path || "/default/path/to/uploads";
+    const environment = process.env.NODE_ENV || "development";
+    return environment === "development"
+        ? process.env.content_path || ""
+        : "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads";
 };
 
+// Helper function to validate required parameters
 const validateParameters = (params: Record<string, any>, required: string[]): void => {
     const missing = required.filter(param => !params[param]);
     if (missing.length) {
@@ -21,58 +27,48 @@ const validateParameters = (params: Record<string, any>, required: string[]): vo
     }
 };
 
+// Helper function to generate a timestamped filename
 const generateTimestampedFilename = (originalName: string): string => {
     const ext = path.extname(originalName);
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     return `${timestamp}${ext}`;
 };
 
-const isExcelFile = (mimetype: string): boolean => {
-    return [
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ].includes(mimetype);
-};
-
-const handleUploadRoute = (file: Express.Multer.File, req: any): string => {
-    validateParameters(req.body, ["org_id"]);
-    if (file.mimetype === "application/pdf") {
-        return `${getMainPath()}/uploadeddocument`;
-    } else if (file.mimetype === "video/mp4") {
-        return `${getMainPath()}/pdf/${req.body.org_id}`;
-    }
-    throw new AppError(`Unsupported file type: ${file.mimetype}`, 400);
-};
-
-const handleUserDataRoute = (file: Express.Multer.File, req: any): string => {
-    validateParameters(req.body, ["course_id", "sponsor_id", "batch_name"]);
-    if (isExcelFile(file.mimetype)) {
-        return `${getMainPath()}/excel/user/${req.body.batch_name}`;
-    }
-    throw new AppError(`Unsupported file type: ${file.mimetype}`, 400);
-};
-
-const handleExamDataRoute = (file: Express.Multer.File, req: any): string => {
-    validateParameters(req.body, ["exam_id"]);
-    if (isExcelFile(file.mimetype)) {
-        return `${getMainPath()}/excel/questions/${req.body.exam_id}`;
-    }
-    throw new AppError(`Unsupported file type: ${file.mimetype}`, 400);
-};
-
+// Helper function to determine file destination based on mimetype and route
 const getFileDestination = (file: Express.Multer.File, req: any): string => {
-    switch (req.url) {
+    const mainPath = getMainPath();
+    switch(req.url){
         case "/upload":
-            return handleUploadRoute(file, req);
+            validateParameters(req.body, ["org_id"]);
+            if(file.mimetype==="application/pdf"){
+                return `${mainPath}/uploadeddocument`;
+            }
+            else if(file.mimetype==="video/mp4"){
+                return `${mainPath}/pdf/${req.body.org_id}`;
+            }
+            else{
+            throw new AppError("Unsupported file type!", 400);
+            }
         case "/upload/user-data":
-            return handleUserDataRoute(file, req);
+            if(file.mimetype==="application/vnd.ms-excel"|| file.mimetype==="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"){
+                validateParameters(req.body, ["course_id", "sponsor_id", "batch_name"]);
+                return `${mainPath}/excel/user/${req.body.batch_name}`;
+            }else{
+            throw new AppError("Unsupported file type!", 400);
+            }
         case "/upload/exam-data":
-            return handleExamDataRoute(file, req);
-        default:
-            throw new AppError(`Unsupported route: ${req.url}`, 400);
+            if(file.mimetype==="application/vnd.ms-excel"|| file.mimetype==="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"){
+                validateParameters(req.body, ["exam_id"]);
+                return `${mainPath}/excel/questions/${req.body.exam_id}`;
+            }else{
+                throw new AppError("Unsupported file type!", 400);
+
+            }
+        
     }
 };
 
+// Multer storage configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         try {
@@ -98,6 +94,7 @@ const storage = multer.diskStorage({
     },
 });
 
+// Multer upload configuration
 const upload = multer({ storage });
 
 export { upload };
