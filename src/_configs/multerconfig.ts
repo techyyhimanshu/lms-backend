@@ -12,11 +12,11 @@ const createDirectory = (dirPath: string): void => {
 };
 
 // Helper function to get the main path based on the environment
-const getMainPath = (): string => {
+const getMainPath = (): any => {
     const environment = process.env.NODE_ENV || "development";
     return environment === "development"
-        ? process.env.content_path || ""
-        : "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads";
+        ? process.env.content_path 
+        : process.env.content_path;
 };
 
 // Helper function to validate required parameters
@@ -35,36 +35,36 @@ const generateTimestampedFilename = (originalName: string): string => {
 };
 
 // Helper function to determine file destination based on mimetype and route
-const getFileDestination = (file: Express.Multer.File, req: any): string => {
+const getFileDestination = (file: Express.Multer.File, req: any): any => {
     const mainPath = getMainPath();
-    switch(req.url){
+    switch (req.url) {
         case "/upload":
             validateParameters(req.body, ["org_id"]);
-            if(file.mimetype==="application/pdf"){
+            if (file.mimetype === "application/pdf") {
                 return `${mainPath}/uploadeddocument`;
             }
-            else if(file.mimetype==="video/mp4"){
+            else if (file.mimetype === "video/mp4") {
                 return `${mainPath}/pdf/${req.body.org_id}`;
             }
-            else{
-            throw new AppError("Unsupported file type!", 400);
+            else {
+                throw new AppError("Unsupported file type!", 400);
             }
         case "/upload/user-data":
-            if(file.mimetype==="application/vnd.ms-excel"|| file.mimetype==="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"){
+            if (file.mimetype === "application/vnd.ms-excel" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
                 validateParameters(req.body, ["course_id", "sponsor_id", "batch_name"]);
                 return `${mainPath}/excel/user/${req.body.batch_name}`;
-            }else{
-            throw new AppError("Unsupported file type!", 400);
+            } else {
+                throw new AppError("Unsupported file type!", 400);
             }
         case "/upload/exam-data":
-            if(file.mimetype==="application/vnd.ms-excel"|| file.mimetype==="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"){
+            if (file.mimetype === "application/vnd.ms-excel" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
                 validateParameters(req.body, ["exam_id"]);
                 return `${mainPath}/excel/questions/${req.body.exam_id}`;
-            }else{
+            } else {
                 throw new AppError("Unsupported file type!", 400);
 
             }
-        
+
     }
 };
 

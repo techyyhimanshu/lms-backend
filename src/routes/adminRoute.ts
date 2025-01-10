@@ -18,7 +18,7 @@ router.get('/getsponsor', admin.sponsor);
 router.get('/getcourse', admin.course);
 router.post('/getbatchname', admin.getbatchname);
 router.post('/upload', upload.single('file'), admin.uploadPdf);
-router.post('/course/new', validateSchema, admin.addNewCourse);
+router.post('/course/new', admin.addNewCourse);
 router.post('/chapter/new', admin.addNewChapter);
 router.post('/exam/new', admin.addNewExam);
 router.get('/getchapter/:courseid', admin.chapter);
@@ -31,7 +31,16 @@ router.get('/exam/:id/questions', admin.getExamQuestions);
 // router.get('/getByRole/:role/', admin.);
 
 
-router.get('/user/:id', admin.getUser);
+router.post('/company/new', admin.addNewCompany);
+router.patch('/company/update/:id', admin.updateCompany);
+router.delete('/company/delete/:id', admin.deleteCompany);
+router.get('/company/get-all', admin.getAllCompanies);
+
+router.get('/company/get/:id', admin.getCompany);
+
+
+
+router.get('/user/:id', admin.getUserForUpdate);
 
 
 // Update routes---------------------------------------------------------

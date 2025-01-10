@@ -13,7 +13,7 @@ async function splitPDF(filePath: any, org_id: any) {
 
     // Directory to save the single-page PDFs
     const environment = process.env.NODE_ENV
-    const splitDir: any = environment === 'development' ? "/home/victor/Desktop/Projects/LRSM/lrsm-backend/uploads/pdf"
+    const splitDir: any = environment === 'development' ? process.env.content_path
         : process.env.content_path;
     console.log(process.env.NODE_ENV)
     if (!fs.existsSync(splitDir)) {
@@ -29,7 +29,7 @@ async function splitPDF(filePath: any, org_id: any) {
         newPdf.addPage(copiedPage);
 
 
-        const orgFiles = path.join(splitDir, org_id)
+        const orgFiles = path.join(splitDir,"pdf", org_id)
         if (!fs.existsSync(orgFiles)) {
             fs.mkdirSync(orgFiles);
         }

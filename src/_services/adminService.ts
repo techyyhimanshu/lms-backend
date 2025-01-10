@@ -1042,15 +1042,17 @@ const bulkUploadExamQuestionsDataService = async (data: Array<Object>, exam_id: 
     }
 };
 
-const getUserService = async (id: any): Promise<any> => {
+const getUserForUpdateService = async (id: any): Promise<any> => {
     try {
         const result = await sequelize.query(
-            `select NAME,CITY,STATE,EMAILID,MOBILENO from student
-            WHERE LOGINID = :LOGINID or URNNO=:URNNO AND ROLE='USER'`,
+            `SELECT STUDENTID,BATCHID,COURSEID,URNNO,NAME,CITY,STATE,EMAILID,MOBILENO,REFFEREDBY,APPLICATIONNO from student
+            WHERE LOGINID = :LOGINID or URNNO=:URNNO or EMAILID=:EMAILID OR MOBILENO=:MOBILENO and role='USER'`,
             {
                 replacements: {
                     LOGINID: id,
                     URNNO: id,
+                    EMAILID: id,
+                    MOBILENO: id
                 },
                 type: QueryTypes.SELECT
             });
@@ -1060,7 +1062,97 @@ const getUserService = async (id: any): Promise<any> => {
         throw new AppError(error.message, 400)
     }
 };
+const createNewCompanyService = async (data: any): Promise<any> => {
+    let res: any = [];
+    try {
 
+
+        const result = await sequelize.query("insert into companydetails(COMPANYNAME,COMPANYALIAS,COMPANYTYPE) values(:COMPANYNAME,:COMPANYALIAS,:COMPANYTYPE)", {
+            replacements: {
+                COMPANYNAME: data.company_name,
+                COMPANYALIAS: data.alias,
+                COMPANYTYPE: data.type
+            }
+        });
+        return result
+
+    }
+    catch (err) {
+        let er: any = err;
+        throw er;
+    }
+};
+
+const updateCompanyService = async (id: any, data: any): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `UPDATE companydetails SET 
+                COMPANYNAME = :COMPANYNAME,
+                COMPANYALIAS = :COMPANYALIAS,
+                COMPANYTYPE = :COMPANYTYPE
+            WHERE ID = :ID`,
+            {
+                replacements: {
+                    COMPANYNAME: data.name,
+                    COMPANYALIAS: data.alias,
+                    COMPANYTYPE: data.type,
+                    ID: id
+                },
+                type: QueryTypes.UPDATE
+            });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(error.message, 400)
+    }
+};
+const deleteCompanyService = async (id: any): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `delete from companydetails 
+            WHERE ID = :ID`,
+            {
+                replacements: {
+                    ID: id
+                },
+                type: QueryTypes.DELETE
+            });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(error.message, 400)
+    }
+};
+const getAllCompanyService = async (): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `select * from companydetails`,
+            {
+
+                type: QueryTypes.SELECT
+            });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(error.message, 400)
+    }
+};
+const getCompanyService = async (id: any): Promise<any> => {
+    try {
+        const result = await sequelize.query(
+            `select * from companydetails where ID=:ID`,
+            {
+                replacements: {
+                    ID: id
+                },
+                type: QueryTypes.SELECT
+            });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(error.message, 400)
+    }
+};
 export default {
 
     registerbatch,
@@ -1094,5 +1186,10 @@ export default {
     deleteExamService,
     updateExamService,
     updateUserService,
-    getUserService
+    getUserForUpdateService,
+    createNewCompanyService,
+    updateCompanyService,
+    deleteCompanyService,
+    getAllCompanyService,
+    getCompanyService
 }

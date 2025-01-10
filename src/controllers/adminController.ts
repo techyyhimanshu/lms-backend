@@ -363,7 +363,7 @@ const updateUser: RequestHandler = async (req, res, next) => {
     }
     catch (err) {
         let er: any = err;
-        return next( new AppError(er.message,400));
+        return next(new AppError(er.message, 400));
     }
 }
 
@@ -471,16 +471,73 @@ const bulkUploadExamQuestionsData: RequestHandler = async (req, res, next) => {
     //     }
     // }
 };
-const getUser: RequestHandler = async (req, res, next) => {
+const getUserForUpdate: RequestHandler = async (req, res, next) => {
     try {
-        let result: any = await adminService.getUserService(req.params.id)
+        let result: any = await adminService.getUserForUpdateService(req.params.id)
         sendSuccessResponse(res, '', result);
     }
     catch (err) {
         let er: any = err;
-        return next( new AppError(er.message,400));
+        return next(new AppError(er.message, 400));
     }
 }
+
+const addNewCompany: RequestHandler = async (req, res, next) => {
+
+    let result: any;
+    try {
+        result = await adminService.createNewCompanyService(req.body);
+        sendSuccessResponse(res, 'Company created successfully');
+    } catch (error: any) {
+        return next(new AppError(error.message, 400));
+    }
+
+};
+const updateCompany: RequestHandler = async (req, res, next) => {
+
+    let result: any;
+    try {
+        result = await adminService.updateCompanyService(req.params.id,req.body);
+        sendSuccessResponse(res, 'Company updated successfully');
+    } catch (error: any) {
+        return next(new AppError(error.message, 400));
+    }
+
+};
+const deleteCompany: RequestHandler = async (req, res, next) => {
+
+    let result: any;
+    try {
+        result = await adminService.deleteCompanyService(req.params.id);
+        sendSuccessResponse(res, 'Company deleted successfully');
+    } catch (error: any) {
+        return next(new AppError(error.message, 400));
+    }
+
+};
+const getAllCompanies: RequestHandler = async (req, res, next) => {
+
+    let result: any;
+    try {
+        result = await adminService.getAllCompanyService();
+        sendSuccessResponse(res, '', result);
+    } catch (error: any) {
+        return next(new AppError(error.message, 400));
+    }
+
+};
+
+const getCompany: RequestHandler = async (req, res, next) => {
+
+    let result: any;
+    try {
+        result = await adminService.getCompanyService(req.params.id);
+        sendSuccessResponse(res, '', result);
+    } catch (error: any) {
+        return next(new AppError(error.message, 400));
+    }
+
+};
 export default {
 
     viewUploadedData,
@@ -513,6 +570,11 @@ export default {
     deleteExam,
     updateExam,
     updateUser,
-    getUser
+    getUserForUpdate,
+    addNewCompany,
+    updateCompany,
+    deleteCompany,
+    getAllCompanies,
+    getCompany
 
 }
