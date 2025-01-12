@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import Joi from 'joi';
-import _ from 'lodash';
+// import _ from 'lodash';
 import schemas from '../schemas/schemaIndex';
 import { AppError } from '../helpers/customError';
 

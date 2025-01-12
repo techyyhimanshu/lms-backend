@@ -525,21 +525,8 @@ FROM OrgStructureCTE ORDER BY NODEKEY,LEVEL, ORGSTRUCTUREID`, {
 const chapertsummary = async (userId: any, chapterid: any, chaptertype: any): Promise<any> => {
     let userList: any = [];
 
-    const action = 'I';
 
     try {
-        // Call the stored procedure
-        await sequelize.query(`CALL addchaptertime(:userId, :chapterid, :action,:chaptertype)`, {
-            replacements: {
-                userId,
-                chapterid,
-                action,
-                chaptertype,
-            }
-        });
-
-
-
         const usertype_list = await sequelize.query(`select SEQUENCE,CONTENT,CONTENTPATH from CONTENTSTATIC where ORGSTRUCTUREID='${chapterid}'`, {
             replacements: {},
             type: QueryTypes.SELECT

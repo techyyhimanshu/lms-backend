@@ -802,11 +802,14 @@ const deleteCourseService = async (id: any): Promise<any> => {
                 transaction,
             }
         );
-        console.log(chapterids)
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         chapterids.map((id: any) => {
-            fs.rename(`${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}`, `${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}-deleted`, (err) => {
-                if (err) throw err;
-            });
+            if(fs.existsSync(`${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}`)){
+                fs.rename(`${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}`, `${process.env.content_path}/pdf/${id.ORGSTRUCTUREID}-deleted-${timestamp}`, (err) => {
+                    if (err) throw err;
+                });
+            }
+            
         })
         // Deleting the chapters related to the course
         await sequelize.query(
@@ -884,9 +887,13 @@ const deleteChapterService = async (id: any): Promise<any> => {
         );
 
         // Deleting chapter folder 
-        fs.rename(`${process.env.content_path}/pdf/${id}`, `${process.env.content_path}/pdf/${id}-deleted`, (err) => {
-            if (err) throw err;
-        });
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        if(fs.existsSync(`${process.env.content_path}/pdf/${id}`)){
+            fs.rename(`${process.env.content_path}/pdf/${id}`, `${process.env.content_path}/pdf/${id}-deleted-${timestamp}`, (err) => {
+                if (err) throw err;
+            });
+        }
+        
 
         await transaction.commit();
         return { status: 1, message: "Chapter deleted successfully" };
@@ -1153,6 +1160,26 @@ const getCompanyService = async (id: any): Promise<any> => {
         throw new AppError(error.message, 400)
     }
 };
+
+const chapertsummary = async (chapterid:any): Promise<any> => {
+    let userList: any = [];
+
+
+    try {
+        const usertype_list = await sequelize.query(`select SEQUENCE,CONTENT,CONTENTPATH from CONTENTSTATIC where ORGSTRUCTUREID='${chapterid}'`, {
+            replacements: {},
+            type: QueryTypes.SELECT
+        });
+
+        userList = usertype_list;
+
+        return userList;
+    }
+    catch (err) {
+        let er: any = err;
+        throw er;
+    }
+};
 export default {
 
     registerbatch,
@@ -1191,5 +1218,6 @@ export default {
     updateCompanyService,
     deleteCompanyService,
     getAllCompanyService,
-    getCompanyService
+    getCompanyService,
+    chapertsummary
 }

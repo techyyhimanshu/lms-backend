@@ -538,6 +538,20 @@ const getCompany: RequestHandler = async (req, res, next) => {
     }
 
 };
+
+const chapertsummary: RequestHandler = async (req, res, next) => {
+
+    debugger
+    let result: any;
+    try {
+        result = await adminService.chapertsummary(req.params.id)
+        res.status(200).json(response.success(result));
+    } catch (error) {
+        var er: any = error
+        next(createHttpError('500', er.message));
+    }
+
+};
 export default {
 
     viewUploadedData,
@@ -575,6 +589,7 @@ export default {
     updateCompany,
     deleteCompany,
     getAllCompanies,
-    getCompany
+    getCompany,
+    chapertsummary
 
 }

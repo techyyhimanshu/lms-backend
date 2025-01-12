@@ -60,6 +60,9 @@ router.delete('/exam/delete/:id', admin.deleteExam);
 router.post('/upload/user-data', upload.single('file'), admin.bulkUploadUserData);
 router.post('/upload/exam-data', upload.single('file'), admin.bulkUploadExamQuestionsData);
 
+router.get('/chaptersummary/:id', admin.chapertsummary);
 
+
+//Report routes
 
 export default router;
